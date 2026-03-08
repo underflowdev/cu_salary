@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CU Salary — CU Colorado Springs Bubble Chart</title>
+  <link rel="stylesheet" href="../css/vis.css">
+  <style>
+    #vis-main { grid-template-columns: 0 1fr 150px; }
+  </style>
+</head>
+<body data-campus-key="colorado_springs" data-campus-label="CU Colorado Springs">
+
+  <header id="vis-header">
+    <a class="back-link" href="../index.html">← Gallery</a>
+    <h1>CU Colorado Springs — Job Family Bubbles</h1>
+    <p class="subtitle">COL-adjusted median salary · FY 2025–26 · 100% FTE only · Bubble area ∝ headcount</p>
+  </header>
+
+  <main id="vis-main">
+    <aside id="margin-left" class="annotation"></aside>
+    <div id="vis-display"></div>
+    <aside id="margin-right" class="annotation"></aside>
+  </main>
+
+  <footer id="vis-footer">
+    <p>
+      Each bubble represents one job family at CU Colorado Springs. Vertical position indicates median COL-adjusted
+      annual salary; bubble area is proportional to headcount. Bubbles are positioned using a static force layout that
+      preserves the salary axis while resolving overlaps. Cost of living index ×1.10 relative to national baseline.
+      Data source: <a href="https://www.cu.edu/budget/cu-salary-database" target="_blank">CU Salary Database</a>.
+    </p>
+  </footer>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="../js/campus-bubble.js"></script>
+</body>
+</html>

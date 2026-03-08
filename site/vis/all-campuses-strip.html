@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CU Salary — All Campuses Strip Chart by Job Family</title>
+  <link rel="stylesheet" href="../css/vis.css">
+  <style>
+    #vis-main { grid-template-columns: 130px 1fr 150px; }
+  </style>
+</head>
+<body>
+
+  <header id="vis-header">
+    <a class="back-link" href="../index.html">← Gallery</a>
+    <h1>CU System — Salary by Job Family</h1>
+    <p class="subtitle">COL-adjusted median salary · FY 2025–26 · All campuses pooled · 100% FTE only · One dot per employee</p>
+  </header>
+
+  <main id="vis-main">
+    <aside id="margin-left" class="annotation"></aside>
+    <div id="vis-display"></div>
+    <aside id="margin-right" class="annotation"></aside>
+  </main>
+
+  <footer id="vis-footer">
+    <p>
+      Each dot represents one full-time (100% FTE) employee across the entire CU system. Salaries are
+      COL-adjusted per campus before pooling — employees at higher cost-of-living locations are deflated
+      to a common baseline before aggregation. Job families are sorted by median COL-adjusted salary,
+      highest first. Box shows IQR; whiskers extend to 1.5×IQR fence; center line is median.
+      Data source: <a href="https://www.cu.edu/budget/cu-salary-database" target="_blank">CU Salary Database</a>.
+    </p>
+  </footer>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="../js/all-campuses-strip.js"></script>
+</body>
+</html>

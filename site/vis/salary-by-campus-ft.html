@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CU Salary — By Campus (Full-Time)</title>
+  <link rel="stylesheet" href="../css/vis.css">
+</head>
+<body>
+
+  <header id="vis-header">
+    <a class="back-link" href="../index.html">← Gallery</a>
+    <h1>CU Employee Salaries by Campus — Full-Time Only</h1>
+    <p class="subtitle">COL-adjusted annual base salary · FY 2025–26 · One dot per employee · 100% FTE appointments only</p>
+  </header>
+
+  <main id="vis-main">
+    <aside id="margin-left" class="annotation"></aside>
+    <div id="vis-display"></div>
+    <aside id="margin-right" class="annotation"></aside>
+  </main>
+
+  <footer id="vis-footer">
+    <p>
+      Each point represents one full-time (100% FTE) employment record in the CU system for FY 2025–26.
+      Part-time, fractional, and records with missing FTE values are excluded.
+      Salary is annual base pay; additional allowances, bonuses, or contractual additions are not included.
+      Employees with multiple appointments may appear more than once if each appointment is full-time.
+      Data source: <a href="https://www.cu.edu/budget/cu-salary-database" target="_blank">CU Salary Database</a>.
+    </p>
+  </footer>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="../js/salary-by-campus-ft.js"></script>
+</body>
+</html>

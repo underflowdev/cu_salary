@@ -1,0 +1,5 @@
+.venv/
+.claude/
+data/progress.json
+__pycache__/
+*.pyc

@@ -1,0 +1,60 @@
+/* Gallery page — vertical scrolling list of vis thumbnails */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: sans-serif;
+  background: #111;
+  color: #eee;
+  min-height: 100vh;
+}
+
+#gallery {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.section-heading {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #555;
+  margin-bottom: 0.75rem;
+}
+
+.card-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  background: #1c1c1c;
+  border: 1px solid #333;
+  transition: border-color 0.15s;
+}
+
+.card:hover { border-color: #888; }
+
+.card img {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+}
+
+.card-text {
+  padding: 0.7rem 0.8rem;
+}
+
+.card-text h2 { font-size: 0.95rem; margin-bottom: 0.3rem; }
+.card-text p  { font-size: 0.78rem; color: #aaa; line-height: 1.4; }
+
+.placeholder { color: #555; font-size: 0.9rem; }

@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "anschutz": {
+      "cost_of_living": 1.213,
+      "city": "Aurora",
+      "county": "Adams",
+      "living_wage_1_adult_0_children": 26.52,
+      "poverty_wage": 7.67,
+      "minimum_wage": 15.16
+    },
+    "boulder": {
+      "cost_of_living": 1.41,
+      "city": "Boulder",
+      "county": "Boulder",
+      "living_wage_1_adult_0_children": 27.09,
+      "poverty_wage": 7.67,
+      "minimum_wage": 15.16
+    },
+
+    "colorado_springs": {
+      "cost_of_living": 1.103,
+      "city": "Colorado Springs",
+      "county": "El Paso",
+      "living_wage_1_adult_0_children": 24.15,
+      "poverty_wage": 7.67,
+      "minimum_wage": 15.16
+    },
+
+    "denver": {
+      "cost_of_living": 1.103,
+      "city": "Denver",
+      "county": "Denver",
+      "living_wage_1_adult_0_children": 26.63,
+      "poverty_wage": 7.67,
+      "minimum_wage": 15.16
+    },
+    "system_administration": {
+      "cost_of_living": 1.276,
+      "city": "Denver-Aurora-Centennial",
+      "county": "Denver-Aurora-Centenial",
+      "living_wage_1_adult_0_children": 27.41,
+      "poverty_wage": 7.67,
+      "minimum_wage": 15.16
+    }
+  },
+  "sources": {
+    "salaries": "https://www.cu.edu/budget/cu-salary-database",
+    "cost_of_living": "https://www.bestplaces.net/",
+    "living_wage": "https://livingwage.mit.edu/"
+  }
+}

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CU Salary — Multi-Campus Bubble Chart</title>
+  <link rel="stylesheet" href="../css/vis.css">
+  <style>
+    #vis-main { grid-template-columns: 0 1fr 150px; }
+  </style>
+</head>
+<body>
+
+  <header id="vis-header">
+    <a class="back-link" href="../index.html">← Gallery</a>
+    <h1>CU System — Job Families by Campus</h1>
+    <p class="subtitle">COL-adjusted median salary · FY 2025–26 · 100% FTE only · One bubble per campus × job family · Bubble area ∝ headcount</p>
+  </header>
+
+  <main id="vis-main">
+    <aside id="margin-left" class="annotation"></aside>
+    <div id="vis-display"></div>
+    <aside id="margin-right" class="annotation"></aside>
+  </main>
+
+  <footer id="vis-footer">
+    <p>
+      Each bubble represents one job family at one campus. Campuses are arranged in columns sharing a common
+      Y axis (median COL-adjusted annual salary), allowing direct salary comparison across campuses for the
+      same job family. Bubble area is proportional to headcount within that campus. A force layout resolves
+      overlaps while preserving vertical salary position.
+      Data source: <a href="https://www.cu.edu/budget/cu-salary-database" target="_blank">CU Salary Database</a>.
+    </p>
+  </footer>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="../js/multi-campus-bubble.js"></script>
+</body>
+</html>
