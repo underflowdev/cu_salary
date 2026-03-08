@@ -58,7 +58,7 @@ Three loosely coupled components:
 
 All salaries are COL-adjusted (divided by `cost_of_living` from `metadata.json`) before display. Wage threshold markers (poverty, minimum, living wage) are shown per-campus as short horizontal dashes; values are `wage × 2080 / cost_of_living`.
 
-**`metadata.json`** (repo root, served at `/metadata.json`) — per-campus COL index and wage thresholds. Keys: `boulder`, `anschutz`, `colorado_springs`, `denver`, `system_administration`. Each entry: `cost_of_living`, `city`, `living_wage_1_adult_0_children`, `poverty_wage`, `minimum_wage`.
+**`metadata.json`** (`data/metadata.json`, served at `/data/metadata.json`) — per-campus COL index and wage thresholds. Keys: `boulder`, `anschutz`, `colorado_springs`, `denver`, `system_administration`. Each entry: `cost_of_living`, `city`, `living_wage_1_adult_0_children`, `poverty_wage`, `minimum_wage`.
 
 **Campus overview:**
 - `vis/salary-by-campus-ft.html` + `js/salary-by-campus-ft.js` — jittered strip chart, full-time employees only (`full_time_pct === "100"`); salary on Y, campus on X (alphabetical left-to-right); box-and-whisker overlay (de-emphasized); left margin: n / COL / Q1 / median / Q3; right margin: wage threshold legend + sources
