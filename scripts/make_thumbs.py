@@ -14,11 +14,13 @@ BASE   = f"http://localhost:{PORT}/site"
 
 PAGES = [
     ("salary-by-campus-ft",               "vis/salary-by-campus-ft.html"),
+    ("ecdf",                               "vis/ecdf.html"),
     ("all-campuses-strip",                "vis/all-campuses-strip.html"),
     ("all-campuses-bubble",               "vis/all-campuses-bubble.html"),
     ("multi-campus-bubble",               "vis/multi-campus-bubble.html"),
     ("campus-boulder",                     "vis/campus-boulder.html"),
     ("campus-boulder-bubble",              "vis/campus-boulder-bubble.html"),
+    ("boulder-scatter",                    "vis/boulder-scatter.html"),
     ("campus-anschutz",                    "vis/campus-anschutz.html"),
     ("campus-anschutz-bubble",             "vis/campus-anschutz-bubble.html"),
     ("campus-denver",                      "vis/campus-denver.html"),

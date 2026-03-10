@@ -8,6 +8,11 @@
 <body>
   <div id="gallery">
 
+    <header style="padding:2.5rem 2rem 1.5rem;max-width:1100px;margin:0 auto;">
+      <h1 style="font-size:2rem;font-weight:700;color:#ddd;margin:0 0 0.4rem;">CU Employee Salaries</h1>
+      <p style="font-size:1rem;color:#888;margin:0;">University of Colorado system — FY 2025–26. All salaries COL-adjusted.</p>
+    </header>
+
     <section class="gallery-section">
       <h3 class="section-heading">All Campuses</h3>
       <div class="card-row">
@@ -16,6 +21,13 @@
           <div class="card-text">
             <h2>Salary by Campus — Full-Time Only</h2>
             <p>Every full-time (100% FTE) CU employee as a single dot, grouped by campus and positioned by annual base salary.</p>
+          </div>
+        </a>
+        <a class="card" href="vis/ecdf.html">
+          <img src="img/thumbs/ecdf.png" alt="Salary Distribution by Campus">
+          <div class="card-text">
+            <h2>Salary Distribution by Campus</h2>
+            <p>Cumulative distribution of COL-adjusted salary for each campus. Hover to compare percentiles across campuses at any salary level.</p>
           </div>
         </a>
         <a class="card" href="vis/all-campuses-strip.html">
@@ -77,6 +89,14 @@
           <div class="card-text">
             <h2>CU Boulder Salary Bubble Chart</h2>
             <p>Each job family as a bubble sized by headcount, positioned by median salary.</p>
+          </div>
+        </a>
+
+        <a class="card" href="vis/boulder-scatter.html">
+          <img src="img/thumbs/boulder-scatter.png" alt="CU Boulder Salary vs. Headcount">
+          <div class="card-text">
+            <h2>CU Boulder Salary vs. Job Family Size</h2>
+            <p>Does a larger department mean higher pay? Each dot is a job family; X = headcount, Y = median salary.</p>
           </div>
         </a>
       </div>
@@ -147,11 +167,11 @@
   <footer style="max-width:1100px;margin:0 auto;padding:1.5rem 2rem 3rem;border-top:1px solid #222;">
     <p style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:#555;margin-bottom:0.75rem;">Download raw data (FY 2025–26)</p>
     <div style="display:flex;gap:1rem;flex-wrap:wrap;">
-      <a href="/data/2026_anschutz.csv"              download style="font-size:0.8rem;color:#76b7b2;text-decoration:none;">CU Anschutz ↓</a>
-      <a href="/data/2026_boulder.csv"               download style="font-size:0.8rem;color:#4e79a7;text-decoration:none;">CU Boulder ↓</a>
-      <a href="/data/2026_colorado_springs.csv"      download style="font-size:0.8rem;color:#f28e2b;text-decoration:none;">CU Colorado Springs ↓</a>
-      <a href="/data/2026_denver.csv"                download style="font-size:0.8rem;color:#e15759;text-decoration:none;">CU Denver ↓</a>
-      <a href="/data/2026_system_administration.csv" download style="font-size:0.8rem;color:#59a14f;text-decoration:none;">System Administration ↓</a>
+      <a href="/cu/data/2026_anschutz.csv"              download style="font-size:0.8rem;color:#76b7b2;text-decoration:none;">CU Anschutz ↓</a>
+      <a href="/cu/data/2026_boulder.csv"               download style="font-size:0.8rem;color:#4e79a7;text-decoration:none;">CU Boulder ↓</a>
+      <a href="/cu/data/2026_colorado_springs.csv"      download style="font-size:0.8rem;color:#f28e2b;text-decoration:none;">CU Colorado Springs ↓</a>
+      <a href="/cu/data/2026_denver.csv"                download style="font-size:0.8rem;color:#e15759;text-decoration:none;">CU Denver ↓</a>
+      <a href="/cu/data/2026_system_administration.csv" download style="font-size:0.8rem;color:#59a14f;text-decoration:none;">System Administration ↓</a>
     </div>
   </footer>
 

@@ -1,12 +1,12 @@
 // Jittered strip chart: full-time employees only (full_time_pct === "100").
-// Expects the HTTP server to run from the repo root so /data/ is reachable.
+// Paths use /cu/ prefix; for local dev create a symlink: ln -s site cu && ln -s ../data cu/data
 
 const FILES = {
-  "CU Anschutz":            "/data/2026_anschutz.csv",
-  "CU Boulder":             "/data/2026_boulder.csv",
-  "CU Colorado Springs":    "/data/2026_colorado_springs.csv",
-  "CU Denver":              "/data/2026_denver.csv",
-  "System Administration":  "/data/2026_system_administration.csv",
+  "CU Anschutz":            "/cu/data/2026_anschutz.csv",
+  "CU Boulder":             "/cu/data/2026_boulder.csv",
+  "CU Colorado Springs":    "/cu/data/2026_colorado_springs.csv",
+  "CU Denver":              "/cu/data/2026_denver.csv",
+  "System Administration":  "/cu/data/2026_system_administration.csv",
 };
 
 const CAMPUS_ORDER = Object.keys(FILES);
@@ -33,7 +33,7 @@ function parseSalary(s) {
 // ── Load metadata + all CSVs ─────────────────────────────────────────────────
 
 Promise.all([
-  d3.json("/data/metadata.json"),
+  d3.json("/cu/data/metadata.json"),
   ...Object.entries(FILES).map(([label, path]) =>
     d3.csv(path).then(rows => rows
       .filter(r => r.full_time_pct === "100")
@@ -197,9 +197,8 @@ function draw(data, campusMeta) {
   // Values are COL-adjusted (wage × 2080 ÷ COL) to match the Y axis scale.
 
   const WAGE_MARKERS = [
-    { key: "poverty_wage",                    label: "Poverty",      color: "#e05252", dash: "3,3"  },
-    { key: "minimum_wage",                    label: "Min. wage",    color: "#e0a052", dash: "6,3"  },
-    { key: "living_wage_1_adult_0_children",  label: "Living wage",  color: "#52b052", dash: "9,3"  },
+    { key: "living_wage_1_adult_0_children",  label: "Living wage (1 adult)",  color: "#52b052", dash: "9,3"  },
+  { key: "median_wage",                         label: "Median county wage",    color: "#9b7fd4", dash: "12,3" },
   ];
 
   const markerHalfW = xScale.step() * 0.44;
@@ -261,7 +260,8 @@ function draw(data, campusMeta) {
         <strong style="color:#444;">Sources</strong><br>
         Salaries: <a href="https://www.cu.edu/budget/cu-salary-database" target="_blank" style="color:#555;">CU Salary Database</a><br>
         Cost of living: <a href="https://www.bestplaces.net/" target="_blank" style="color:#555;">BestPlaces.net</a><br>
-        Wage thresholds: <a href="https://livingwage.mit.edu/" target="_blank" style="color:#555;">MIT Living Wage Calculator</a>
+        Wage thresholds: <a href="https://livingwage.mit.edu/" target="_blank" style="color:#555;">MIT Living Wage Calculator</a><br>
+        Median wage: <a href="https://www.census.gov/" target="_blank" style="color:#555;">U.S. Census Bureau</a>
       </div>`;
   }
 }

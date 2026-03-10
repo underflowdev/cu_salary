@@ -13,9 +13,9 @@ const CAMPUSES = [
 const HOURS_PER_YEAR = 2080;
 
 const WAGE_MARKERS = [
-  { key: "poverty_wage",                   label: "Poverty",     color: "#e05252", dash: "3,3" },
-  { key: "minimum_wage",                   label: "Min. wage",   color: "#e0a052", dash: "6,3" },
-  { key: "living_wage_1_adult_0_children", label: "Living wage", color: "#52b052", dash: "9,3" },
+  { key: "living_wage_1_adult_0_children", label: "Living wage (1 adult)", color: "#52b052", dash: "9,3" },
+  { key: "median_wage",                        label: "Median county wage",   color: "#9b7fd4", dash: "12,3" },
+  { key: "minimum_wage",                       label: "Min. wage",            color: "#e0a052", dash: "6,3"  },
 ];
 
 function parseSalary(s) {
@@ -23,9 +23,9 @@ function parseSalary(s) {
 }
 
 Promise.all([
-  d3.json("/data/metadata.json"),
+  d3.json("/cu/data/metadata.json"),
   ...CAMPUSES.map(c =>
-    d3.csv(`/data/2026_${c.key}.csv`).then(rows => ({ key: c.key, rows }))
+    d3.csv(`/cu/data/2026_${c.key}.csv`).then(rows => ({ key: c.key, rows }))
   ),
 ]).then(([metaJson, ...chunks]) => {
   const meta = metaJson.metadata;
@@ -270,7 +270,8 @@ function draw(data, meta) {
         <strong style="color:#444;">Sources</strong><br>
         Salaries: <a href="https://www.cu.edu/budget/cu-salary-database" target="_blank" style="color:#555;">CU Salary Database</a><br>
         Cost of living: <a href="https://www.bestplaces.net/" target="_blank" style="color:#555;">BestPlaces.net</a><br>
-        Wage thresholds: <a href="https://livingwage.mit.edu/" target="_blank" style="color:#555;">MIT Living Wage Calculator</a>
+        Wage thresholds: <a href="https://livingwage.mit.edu/" target="_blank" style="color:#555;">MIT Living Wage Calculator</a><br>
+        Median wage: <a href="https://www.census.gov/" target="_blank" style="color:#555;">U.S. Census Bureau</a>
       </div>`;
   }
 }

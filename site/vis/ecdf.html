@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CU Salary — Salary Distribution by Campus</title>
+  <link rel="stylesheet" href="../css/vis.css">
+  <style>
+    #vis-main { grid-template-columns: 0 1fr 170px; }
+  </style>
+</head>
+<body>
+
+  <header id="vis-header">
+    <a class="back-link" href="../index.html">← Gallery</a>
+    <h1>Salary Distribution by Campus</h1>
+    <p class="subtitle">Cumulative distribution of COL-adjusted salary · FY 2025–26 · 100% FTE only · Hover to compare</p>
+  </header>
+
+  <main id="vis-main">
+    <aside id="margin-left" class="annotation"></aside>
+    <div id="vis-display"></div>
+    <aside id="margin-right" class="annotation"></aside>
+  </main>
+
+  <footer id="vis-footer">
+    <p>
+      Each curve shows what fraction of full-time employees at that campus earn at or below a given salary.
+      A curve shifted to the right indicates higher salaries overall; a steeper curve indicates salaries more tightly clustered
+      around the median. All salaries are divided by a campus-specific cost-of-living index so they reflect
+      purchasing power rather than nominal pay. Hover anywhere on the chart to read off each campus's percentile
+      at that salary level.
+      Data source: <a href="https://www.cu.edu/budget/cu-salary-database" target="_blank">CU Salary Database</a>.
+    </p>
+    <p style="font-size:0.8rem;color:#666;margin-top:0.75rem;">
+      <strong style="color:#555;">Note on excluded data:</strong>
+      The X axis is capped at the 99.5th percentile across all campuses to keep the distribution visible;
+      the top 0.5% of earners (salaries above roughly $500,000 COL-adjusted) are not shown but are included
+      in the percentile calculations. Part-time employees (less than 100% FTE) and malformed rows
+      (column-shifted due to unquoted commas in department names) are excluded entirely.
+    </p>
+  </footer>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="../js/ecdf.js"></script>
+</body>
+</html>

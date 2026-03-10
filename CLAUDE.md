@@ -42,7 +42,8 @@ Three loosely coupled components:
 - Static multi-page D3.js site (MPA, not SPA)
 - Entry point: a responsive grid gallery (`site/index.html`) linking to individual visualizations; cards use `auto-fill minmax(240px)` grid layout with thumbnail on top and text below
 - Data transformation happens client-side in JavaScript
-- Development server: `python3 -m http.server 8080` (run from repo root; site at `http://localhost:8080/site/`, data at `http://localhost:8080/data/`)
+- All data paths use `/cu/` prefix to match production. Local dev requires symlinks: `ln -s site cu && ln -s ../data cu/data`, then serve from repo root at `http://localhost:8080/cu/`
+- Deploy: `scripts/deploy.sh` — syncs `site/` → `s3://underflow.dev/cu/` and `data/` → `s3://underflow.dev/cu/data/`
 - Thumbnails: `source .venv/bin/activate && python3 scripts/make_thumbs.py` — Playwright script that screenshots each vis page and saves 640×360 PNGs to `site/img/thumbs/`
 - Production root: `https://underflow.dev/cu`
 
@@ -56,9 +57,11 @@ Three loosely coupled components:
 
 #### Existing Visualizations
 
-All salaries are COL-adjusted (divided by `cost_of_living` from `metadata.json`) before display. Wage threshold markers (poverty, minimum, living wage) are shown per-campus as short horizontal dashes; values are `wage × 2080 / cost_of_living`.
+All salaries are COL-adjusted (divided by `cost_of_living` from `metadata.json`) before display. Wage threshold markers are shown per-campus as short horizontal dashes; values are `wage × 2080 / cost_of_living`.
 
-**`metadata.json`** (`data/metadata.json`, served at `/data/metadata.json`) — per-campus COL index and wage thresholds. Keys: `boulder`, `anschutz`, `colorado_springs`, `denver`, `system_administration`. Each entry: `cost_of_living`, `city`, `living_wage_1_adult_0_children`, `poverty_wage`, `minimum_wage`.
+**Wage markers** (consistent across all charts): poverty `#e05252 "3,3"`, min wage `#e0a052 "6,3"`, living wage `#52b052 "9,3"`, median county wage `#9b7fd4 "12,3"`. Living wage label reads "Living wage (1 adult)" — figures are for 1 adult, 0 children. Sources: MIT Living Wage Calculator; U.S. Census Bureau (median county wage).
+
+**`metadata.json`** (`data/metadata.json`, served at `/cu/data/metadata.json`) — per-campus COL index and wage thresholds. Keys: `boulder`, `anschutz`, `colorado_springs`, `denver`, `system_administration`. Each entry: `cost_of_living`, `city`, `county`, `living_wage_1_adult_0_children`, `poverty_wage`, `minimum_wage`, `median_wage`.
 
 **Campus overview:**
 - `vis/salary-by-campus-ft.html` + `js/salary-by-campus-ft.js` — jittered strip chart, full-time employees only (`full_time_pct === "100"`); salary on Y, campus on X (alphabetical left-to-right); box-and-whisker overlay (de-emphasized); left margin: n / COL / Q1 / median / Q3; right margin: wage threshold legend + sources

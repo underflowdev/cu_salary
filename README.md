@@ -36,12 +36,24 @@ Output goes to `data/`. The `total` salary field is formatted as `"$127,600.00"`
 
 ## Visualization
 
-Static MPA — one HTML file per chart, shared JS where possible.
+Static MPA — one HTML file per chart, shared JS where possible. All data paths use the `/cu/` prefix to match production hosting at `underflow.dev/cu`.
+
+**Local dev** — set up symlinks so paths resolve correctly, then serve from repo root:
 
 ```bash
+ln -s site cu
+ln -s ../data cu/data
 python3 -m http.server 8080
-# site: http://localhost:8080/site/
+# site: http://localhost:8080/cu/
 ```
+
+**Deploy to S3:**
+
+```bash
+./scripts/deploy.sh
+```
+
+Syncs `site/` → `s3://underflow.dev/cu/` and `data/` → `s3://underflow.dev/cu/data/`. Requires `aws` CLI configured with appropriate credentials.
 
 ### Charts
 

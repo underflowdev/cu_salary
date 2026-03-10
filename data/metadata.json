@@ -5,6 +5,7 @@
       "city": "Aurora",
       "county": "Adams",
       "living_wage_1_adult_0_children": 26.52,
+      "median_wage": 20.29,
       "poverty_wage": 7.67,
       "minimum_wage": 15.16
     },
@@ -13,6 +14,7 @@
       "city": "Boulder",
       "county": "Boulder",
       "living_wage_1_adult_0_children": 27.09,
+      "median_wage": 30.02,
       "poverty_wage": 7.67,
       "minimum_wage": 15.16
     },
@@ -22,6 +24,7 @@
       "city": "Colorado Springs",
       "county": "El Paso",
       "living_wage_1_adult_0_children": 24.15,
+      "median_wage": 22.17,
       "poverty_wage": 7.67,
       "minimum_wage": 15.16
     },
@@ -31,6 +34,7 @@
       "city": "Denver",
       "county": "Denver",
       "living_wage_1_adult_0_children": 26.63,
+      "median_wage": 30.84,
       "poverty_wage": 7.67,
       "minimum_wage": 15.16
     },
@@ -38,7 +42,8 @@
       "cost_of_living": 1.276,
       "city": "Denver-Aurora-Centennial",
       "county": "Denver-Aurora-Centenial",
-      "living_wage_1_adult_0_children": 27.41,
+      "living_wage_1_adult_0_children": 26.0,
+      "median_wage": 25.31,
       "poverty_wage": 7.67,
       "minimum_wage": 15.16
     }
@@ -46,6 +51,7 @@
   "sources": {
     "salaries": "https://www.cu.edu/budget/cu-salary-database",
     "cost_of_living": "https://www.bestplaces.net/",
-    "living_wage": "https://livingwage.mit.edu/"
+    "living_wage": "https://livingwage.mit.edu/",
+    "median_wage": "https://www.census.gov/"
   }
 }

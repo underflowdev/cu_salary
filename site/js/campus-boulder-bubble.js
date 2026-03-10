@@ -2,14 +2,14 @@
 // Force simulation runs synchronously — no animation.
 
 const CAMPUS_KEY = "boulder";
-const CSV_FILE   = `/data/2026_${CAMPUS_KEY}.csv`;
+const CSV_FILE   = `/cu/data/2026_${CAMPUS_KEY}.csv`;
 
 function parseSalary(s) {
   return parseFloat((s || "").replace(/[$,]/g, "")) || 0;
 }
 
 Promise.all([
-  d3.json("/data/metadata.json"),
+  d3.json("/cu/data/metadata.json"),
   d3.csv(CSV_FILE),
 ]).then(([metaJson, rows]) => {
   const meta = metaJson.metadata[CAMPUS_KEY];

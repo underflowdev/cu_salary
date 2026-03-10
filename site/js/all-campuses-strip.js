@@ -2,19 +2,19 @@
 // All campuses pooled; each salary COL-adjusted by campus before aggregation.
 
 const FILES = {
-  boulder:               "/data/2026_boulder.csv",
-  colorado_springs:      "/data/2026_colorado_springs.csv",
-  denver:                "/data/2026_denver.csv",
-  anschutz:              "/data/2026_anschutz.csv",
-  system_administration: "/data/2026_system_administration.csv",
+  boulder:               "/cu/data/2026_boulder.csv",
+  colorado_springs:      "/cu/data/2026_colorado_springs.csv",
+  denver:                "/cu/data/2026_denver.csv",
+  anschutz:              "/cu/data/2026_anschutz.csv",
+  system_administration: "/cu/data/2026_system_administration.csv",
 };
 
 const HOURS_PER_YEAR = 2080;
 
 const WAGE_MARKERS = [
-  { key: "poverty_wage",                   label: "Poverty",     color: "#e05252", dash: "3,3" },
-  { key: "minimum_wage",                   label: "Min. wage",   color: "#e0a052", dash: "6,3" },
-  { key: "living_wage_1_adult_0_children", label: "Living wage", color: "#52b052", dash: "9,3" },
+  { key: "living_wage_1_adult_0_children", label: "Living wage (1 adult)", color: "#52b052", dash: "9,3" },
+  { key: "median_wage",                        label: "Median county wage",   color: "#9b7fd4", dash: "12,3" },
+  { key: "minimum_wage",                       label: "Min. wage",            color: "#e0a052", dash: "6,3"  },
 ];
 
 function parseSalary(s) {
@@ -24,7 +24,7 @@ function parseSalary(s) {
 // ── Load ─────────────────────────────────────────────────────────────────────
 
 Promise.all([
-  d3.json("/data/metadata.json"),
+  d3.json("/cu/data/metadata.json"),
   ...Object.entries(FILES).map(([key, path]) =>
     d3.csv(path).then(rows => ({ key, rows }))
   ),
@@ -232,7 +232,8 @@ function draw(data, meta) {
         <strong style="color:#444;">Sources</strong><br>
         Salaries: <a href="https://www.cu.edu/budget/cu-salary-database" target="_blank" style="color:#555;">CU Salary Database</a><br>
         Cost of living: <a href="https://www.bestplaces.net/" target="_blank" style="color:#555;">BestPlaces.net</a><br>
-        Wage thresholds: <a href="https://livingwage.mit.edu/" target="_blank" style="color:#555;">MIT Living Wage Calculator</a>
+        Wage thresholds: <a href="https://livingwage.mit.edu/" target="_blank" style="color:#555;">MIT Living Wage Calculator</a><br>
+        Median wage: <a href="https://www.census.gov/" target="_blank" style="color:#555;">U.S. Census Bureau</a>
       </div>`;
   }
 }
