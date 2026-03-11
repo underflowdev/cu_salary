@@ -57,7 +57,7 @@ function draw(data, meta) {
 
   const rScale = d3.scaleSqrt()
     .domain([0, d3.max(nodes, d => d.count)])
-    .range([9, 90]);
+    .range([8, 90]);
 
   const COLOR = d3.scaleOrdinal(d3.schemeTableau10)
     .domain(nodes.map(d => d.family));
@@ -162,7 +162,7 @@ function draw(data, meta) {
       </div>
       <div style="font-size:0.72rem;color:#555;margin-top:1rem;line-height:1.6;">
         Bubble area ∝ headcount.<br>
-        Y position = median salary.<br><br>
+        Y ≈ median salary; hover to confirm.<br><br>
         <strong style="color:#444;">Sources</strong><br>
         Salaries: <a href="https://www.cu.edu/budget/cu-salary-database" target="_blank" style="color:#555;">CU Salary Database</a><br>
         Cost of living: <a href="https://www.bestplaces.net/" target="_blank" style="color:#555;">BestPlaces.net</a>

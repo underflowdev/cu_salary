@@ -73,6 +73,10 @@ All salaries are COL-adjusted (divided by `cost_of_living` from `metadata.json`)
 - `vis/all-campuses-bubble.html` + `js/all-campuses-bubble.js` — one bubble per job family, all campuses pooled; COL-adjusted per campus before pooling; wage thresholds = average COL-adjusted across all campuses; right margin: n / family count + threshold legend with dollar amounts
 - `vis/multi-campus-bubble.html` + `js/multi-campus-bubble.js` — one bubble per (campus × job family); campus columns share a Y axis (median COL-adjusted salary); campuses always displayed alphabetically left-to-right (Anschutz, Boulder, Colorado Springs, Denver, System Admin); per-column wage marker dashes (`markerHalfW = xScale.step() * 0.44`); force: `forceX` toward campus center (strength=0.3), `forceY` toward salary target (strength=0.4), 300 ticks
 
+**All-campuses department charts:**
+- `vis/all-depts-strip.html` + `js/all-depts-strip.js` — jittered strip + box/whisker by `dept_name`; all campuses pooled, COL-adjusted per campus; MIN_N=55 (system-wide headcount; yields ~108 depts); same-named depts at different campuses merged; wage thresholds = average COL-adjusted; STEP_PX=28; scrolls horizontally; left margin: n / dept count; right margin: threshold legend + sources
+- `vis/all-depts-bubble.html` + `js/all-depts-bubble.js` — one bubble per `dept_name` system-wide; MIN_N=55; rScale range [8, 90]; 600 force ticks; dynamic SVG expansion post-simulation; tooltip on hover; labels inside bubbles r > 20; wage thresholds = average COL-adjusted; right margin: n / dept count + threshold legend + sources
+
 **Per-campus bubble chart (shared JS, one HTML per campus):**
 - `js/campus-bubble.js` — reads `data-campus-key` / `data-campus-label` from `<body>` dataset; one bubble per job family; bubble area ∝ headcount (`scaleSqrt`, range 9–90); Y position = median COL-adjusted salary; force simulation runs synchronously (200 ticks, no animation); labels inside bubbles with r > 20; right margin: city/COL/n/family count + sources
 - Force layout: `forceCollide(r+2, strength=0.85, iterations=2)` + `forceX` toward center (strength=0.04) + `forceY` toward salary target (strength=0.4)
@@ -83,6 +87,25 @@ All salaries are COL-adjusted (divided by `cost_of_living` from `metadata.json`)
 - `js/salary-by-jobfamily.js` — reads `data-campus-key` / `data-campus-label` from `<body>` dataset; X-axis = job_family sorted by median descending; malformed rows excluded by numeric `full_time_pct` filter; full-width wage threshold lines; right margin: threshold legend with dollar amounts + sources
 - `vis/campus-boulder.html`, `vis/campus-anschutz.html`, `vis/campus-denver.html`, `vis/campus-colorado-springs.html`, `vis/campus-system-administration.html`
 - Detail pages use `grid-template-columns: 130px 1fr 150px` (narrower margins than the CSS default `200px 1fr 200px`)
+
+**Per-campus department strip chart (shared JS, one HTML per campus):**
+- `js/campus-dept.js` — reads `data-campus-key` / `data-campus-label` from `<body>` dataset; jittered strip + box/whisker by `dept_name`; MIN_N=10 filter; STEP_PX=28; SVG width = groups.length × STEP_PX; `#vis-display` scrolls horizontally; X-axis labels rotated −55°; left margin: campus label / COL / n / dept count; right margin: wage threshold legend + sources
+- HTML pages: `vis/boulder-dept.html`, `vis/anschutz-dept.html`, `vis/colorado-springs-dept.html`, `vis/denver-dept.html`, `vis/system-administration-dept.html`
+- Legacy `js/boulder-dept.js` kept as reference but pages now use the shared script
+
+**Boulder Regular Faculty department strip chart:**
+- `js/boulder-faculty-dept.js` — hardcoded to boulder; filters `job_family === "Regular Faculty"` and `full_time_pct === "100"`; jittered strip + box/whisker by `dept_name`; MIN_N=5; STEP_PX=28; scrolls horizontally; +n outlier label above whisker fence; left margin: campus/COL/n/dept count; right margin: threshold legend + sources
+- `vis/boulder-faculty-dept.html` — no campus data attributes (hardcoded)
+
+**Per-campus department bubble chart (shared JS, one HTML per campus):**
+- `js/campus-dept-bubble.js` — reads `data-campus-key` / `data-campus-label` from `<body>` dataset; one bubble per `dept_name`; MIN_N=10; rScale range [8, 90]; 600 force ticks; dynamic SVG expansion post-simulation; tooltip on hover (dept, n, Q1/med/Q3); labels inside bubbles with r > 20
+- HTML pages: `vis/boulder-dept-bubble.html`, `vis/anschutz-dept-bubble.html`, `vis/colorado-springs-dept-bubble.html`, `vis/denver-dept-bubble.html`, `vis/system-administration-dept-bubble.html`
+- Legacy `js/boulder-dept-bubble.js` kept as reference but pages now use the shared script
+
+**Per-campus scatter: salary vs. job family size (shared JS, one HTML per campus):**
+- `js/campus-scatter.js` — reads `data-campus-key` / `data-campus-label` from `<body>` dataset; one dot per job family; X = headcount, Y = median COL-adjusted salary; IQR bars; tooltip on hover; right margin: campus label / COL / n / family count + wage threshold legend + sources
+- HTML pages: `vis/boulder-scatter.html`, `vis/anschutz-scatter.html`, `vis/colorado-springs-scatter.html`, `vis/denver-scatter.html`, `vis/system-administration-scatter.html`
+- Legacy `js/boulder-scatter.js` kept as reference but pages now use the shared script
 
 **Box-and-whisker style (all charts):** dots `r=1.5, opacity=0.35`; whiskers `stroke-width=1.5, opacity=0.6`; IQR box `fill-opacity=0.12, stroke-width=1.5, opacity=0.75`; median `stroke="#fff", stroke-width=2, opacity=0.75`.
 

@@ -42,12 +42,12 @@ Promise.all([
 
 function draw(data, meta) {
   const container = document.getElementById("vis-display");
-  const W = container.clientWidth  || 1200;
-  const H = container.clientHeight || 700;
+  const frameW = container.clientWidth  || 1200;
+  const frameH = container.clientHeight || 700;
 
   const margin = { top: 40, right: 20, bottom: 40, left: 80 };
-  const innerW  = W - margin.left - margin.right;
-  const innerH  = H - margin.top  - margin.bottom;
+  const innerW  = frameW - margin.left - margin.right;
+  const innerH  = frameH - margin.top  - margin.bottom;
 
   // ── Aggregate to one node per job family ──────────────────────────────────
 
@@ -82,7 +82,7 @@ function draw(data, meta) {
 
   const rScale = d3.scaleSqrt()
     .domain([0, d3.max(nodes, d => d.count)])
-    .range([9, 90]);
+    .range([12, 135]);
 
   const COLOR = d3.scaleOrdinal(d3.schemeTableau10)
     .domain(nodes.map(d => d.family));
@@ -107,6 +107,10 @@ function draw(data, meta) {
   for (let i = 0; i < 200; i++) sim.tick();
 
   // ── Render ────────────────────────────────────────────────────────────────
+
+  const PAD = 20;
+  const W = Math.max(frameW, d3.max(nodes, d => d.x + d.r) + PAD);
+  const H = Math.max(frameH, d3.max(nodes, d => d.y + d.r) + PAD);
 
   const svg = d3.select("#vis-display").append("svg")
     .attr("width",  W)
@@ -241,7 +245,7 @@ function draw(data, meta) {
       </div>
       <div style="font-size:0.72rem;color:#555;margin-top:1rem;line-height:1.6;">
         Bubble area ∝ headcount.<br>
-        Y position = median salary.<br>
+        Y ≈ median salary; hover to confirm.<br>
         Salary COL-adjusted per campus<br>before pooling. Thresholds are<br>averages across all campuses.<br><br>
         <strong style="color:#444;">Sources</strong><br>
         Salaries: <a href="https://www.cu.edu/budget/cu-salary-database" target="_blank" style="color:#555;">CU Salary Database</a><br>

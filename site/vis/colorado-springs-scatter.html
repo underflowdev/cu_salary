@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CU Salary — CU Colorado Springs Salary vs. Headcount</title>
+  <link rel="stylesheet" href="../css/vis.css">
+  <style>
+    #vis-main { grid-template-columns: 0 1fr 160px; }
+  </style>
+</head>
+<body data-campus-key="colorado_springs" data-campus-label="CU Colorado Springs">
+
+  <header id="vis-header">
+    <a class="back-link" href="../index.html">← Gallery</a>
+    <h1>CU Colorado Springs — Salary vs. Job Family Size</h1>
+    <p class="subtitle">Median COL-adjusted salary vs. headcount per job family · FY 2025–26 · 100% FTE only</p>
+  </header>
+
+  <main id="vis-main">
+    <aside id="margin-left" class="annotation"></aside>
+    <div id="vis-display"></div>
+    <aside id="margin-right" class="annotation"></aside>
+  </main>
+
+  <footer id="vis-footer">
+    <p>
+      Each dot represents one job family at CU Colorado Springs. The horizontal axis shows total full-time headcount in that
+      family; the vertical axis shows median COL-adjusted annual salary. The vertical bar through each dot spans the
+      interquartile range (Q1–Q3). A positive relationship would suggest larger departments command higher salaries;
+      a negative or flat relationship suggests pay is driven more by field than by organizational scale.
+      Data source: <a href="https://www.cu.edu/budget/cu-salary-database" target="_blank">CU Salary Database</a>.
+    </p>
+  </footer>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="../js/campus-scatter.js"></script>
+</body>
+</html>

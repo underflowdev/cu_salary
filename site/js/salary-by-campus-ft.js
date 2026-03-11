@@ -62,12 +62,21 @@ function draw(data, campusMeta) {
   const innerW = W - margin.left - margin.right;
   const innerH = H - margin.top  - margin.bottom;
 
-  const svg = d3.select("#vis-display").append("svg")
-    .attr("width",  W)
-    .attr("height", H);
+  // ── Stats (computed before scales — Q3 values set the y-axis top) ─────────
 
-  const g = svg.append("g")
-    .attr("transform", `translate(${margin.left},${margin.top})`);
+  const stats = d3.rollup(data, v => {
+    const sorted  = v.map(d => d.salary).sort(d3.ascending);
+    const q1      = d3.quantile(sorted, 0.25);
+    const med     = d3.quantile(sorted, 0.50);
+    const q3      = d3.quantile(sorted, 0.75);
+    const iqr     = q3 - q1;
+    const lo      = d3.min(sorted.filter(s => s >= q1 - 1.5 * iqr));
+    const hi      = d3.max(sorted.filter(s => s <= q3 + 1.5 * iqr));
+    const n_above = sorted.filter(s => s > hi).length;
+    return { q1, med, q3, lo, hi, n_above, count: sorted.length };
+  }, d => d.campus);
+
+  const maxQ3 = d3.max(CAMPUS_ORDER, c => stats.get(c)?.q3 ?? 0);
 
   // ── Scales ─────────────────────────────────────────────────────────────────
 
@@ -77,14 +86,21 @@ function draw(data, campusMeta) {
     .padding(0.5);
 
   const yScale = d3.scaleLinear()
-    .domain([0, d3.max(data, d => d.salary)])
+    .domain([0, maxQ3 * 1.15])
     .range([innerH, 0])
     .nice();
 
-  const bandwidth = xScale.step() * 0.35;  // jitter half-width
+  const yTop = yScale.domain()[1];
 
-  // Seed jitter per point so it's stable on redraw
+  const bandwidth = xScale.step() * 0.35;  // jitter half-width
   const jitter = d3.randomUniform(-bandwidth, bandwidth);
+
+  const svg = d3.select("#vis-display").append("svg")
+    .attr("width",  W)
+    .attr("height", H);
+
+  const g = svg.append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
 
   // ── Axes ────────────────────────────────────────────────────────────────────
 
@@ -119,14 +135,11 @@ function draw(data, campusMeta) {
     .style("font-size", "12px")
     .text("COL-Adjusted Annual Salary");
 
-  // ── Dots ────────────────────────────────────────────────────────────────────
-
-  // Shuffle so no campus is systematically on top
-  const shuffled = d3.shuffle([...data]);
+  // ── Dots (only salary ≤ group Q3) ───────────────────────────────────────
 
   g.append("g")
     .selectAll("circle")
-    .data(shuffled)
+    .data(d3.shuffle([...data]).filter(d => d.salary <= (stats.get(d.campus)?.hi ?? Infinity)))
     .join("circle")
       .attr("cx", d => xScale(d.campus) + jitter())
       .attr("cy", d => yScale(d.salary))
@@ -136,44 +149,39 @@ function draw(data, campusMeta) {
 
   // ── Box and whisker overlays ─────────────────────────────────────────────
 
-  // Compute quartiles + IQR-fenced whiskers per campus
-  const stats = d3.rollup(data, v => {
-    const sorted = v.map(d => d.salary).sort(d3.ascending);
-    const q1  = d3.quantile(sorted, 0.25);
-    const med = d3.quantile(sorted, 0.50);
-    const q3  = d3.quantile(sorted, 0.75);
-    const iqr = q3 - q1;
-    const lo  = d3.min(sorted.filter(s => s >= q1 - 1.5 * iqr));
-    const hi  = d3.max(sorted.filter(s => s <= q3 + 1.5 * iqr));
-    return { q1, med, q3, lo, hi, count: sorted.length };
-  }, d => d.campus);
-
-  const boxW   = bandwidth * 1.1;   // half-width of IQR box
-  const whiskerW = boxW * 0.45;     // half-width of whisker caps
+  const boxW     = bandwidth * 1.1;
+  const whiskerW = boxW * 0.45;
 
   CAMPUS_ORDER.forEach(campus => {
     const s = stats.get(campus);
     if (!s) return;
-    const x = xScale(campus);
+    const x     = xScale(campus);
     const color = COLOR(campus);
 
-    // Whisker: lo → Q1
+    // Lower whisker
     g.append("line")
       .attr("x1", x).attr("x2", x)
       .attr("y1", yScale(s.lo)).attr("y2", yScale(s.q1))
       .attr("stroke", color).attr("stroke-width", 1.5).attr("opacity", 0.6);
 
-    // Whisker: Q3 → hi
+    // Lower fence cap
     g.append("line")
-      .attr("x1", x).attr("x2", x)
-      .attr("y1", yScale(s.q3)).attr("y2", yScale(s.hi))
+      .attr("x1", x - whiskerW).attr("x2", x + whiskerW)
+      .attr("y1", yScale(s.lo)).attr("y2", yScale(s.lo))
       .attr("stroke", color).attr("stroke-width", 1.5).attr("opacity", 0.6);
 
-    // Whisker caps
-    for (const fence of [s.lo, s.hi]) {
+    // Upper whisker — capped at yTop
+    const hiDrawn = Math.min(s.hi, yTop);
+    g.append("line")
+      .attr("x1", x).attr("x2", x)
+      .attr("y1", yScale(s.q3)).attr("y2", yScale(hiDrawn))
+      .attr("stroke", color).attr("stroke-width", 1.5).attr("opacity", 0.6);
+
+    // Upper fence cap — only if within chart
+    if (s.hi <= yTop) {
       g.append("line")
         .attr("x1", x - whiskerW).attr("x2", x + whiskerW)
-        .attr("y1", yScale(fence)).attr("y2", yScale(fence))
+        .attr("y1", yScale(s.hi)).attr("y2", yScale(s.hi))
         .attr("stroke", color).attr("stroke-width", 1.5).attr("opacity", 0.6);
     }
 
@@ -191,6 +199,18 @@ function draw(data, campusMeta) {
       .attr("x1", x - boxW).attr("x2", x + boxW)
       .attr("y1", yScale(s.med)).attr("y2", yScale(s.med))
       .attr("stroke", "#fff").attr("stroke-width", 2).attr("opacity", 0.75);
+
+    // "+n" label above the upper whisker fence
+    if (s.n_above > 0) {
+      g.append("text")
+        .attr("transform", `translate(${x}, ${yScale(hiDrawn) - 4}) rotate(-90)`)
+        .attr("text-anchor", "start")
+        .attr("dominant-baseline", "middle")
+        .style("font-size", "9px")
+        .style("fill", color)
+        .style("opacity", 0.8)
+        .text(`+${s.n_above}`);
+    }
   });
 
   // ── Wage threshold markers ───────────────────────────────────────────────
@@ -198,7 +218,7 @@ function draw(data, campusMeta) {
 
   const WAGE_MARKERS = [
     { key: "living_wage_1_adult_0_children",  label: "Living wage (1 adult)",  color: "#52b052", dash: "9,3"  },
-  { key: "median_wage",                         label: "Median county wage",    color: "#9b7fd4", dash: "12,3" },
+    { key: "median_wage",                     label: "Median county wage",      color: "#9b7fd4", dash: "12,3" },
   ];
 
   const markerHalfW = xScale.step() * 0.44;
@@ -208,10 +228,11 @@ function draw(data, campusMeta) {
     const x = xScale(campus);
 
     WAGE_MARKERS.forEach(({ key, color, dash }) => {
-      const y = yScale(m[key] * HOURS_PER_YEAR / m.cost_of_living);
+      const val = m[key] * HOURS_PER_YEAR / m.cost_of_living;
+      if (val > yTop) return;
       g.append("line")
         .attr("x1", x - markerHalfW).attr("x2", x + markerHalfW)
-        .attr("y1", y).attr("y2", y)
+        .attr("y1", yScale(val)).attr("y2", yScale(val))
         .attr("stroke", color)
         .attr("stroke-width", 1.5)
         .attr("stroke-dasharray", dash)
