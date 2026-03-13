@@ -93,9 +93,11 @@ All salaries are COL-adjusted (divided by `cost_of_living` from `metadata.json`)
 - HTML pages: `vis/boulder-dept.html`, `vis/anschutz-dept.html`, `vis/colorado-springs-dept.html`, `vis/denver-dept.html`, `vis/system-administration-dept.html`
 - Legacy `js/boulder-dept.js` kept as reference but pages now use the shared script
 
-**Boulder Regular Faculty department strip chart:**
-- `js/boulder-faculty-dept.js` — hardcoded to boulder; filters `job_family === "Regular Faculty"` and `full_time_pct === "100"`; jittered strip + box/whisker by `dept_name`; MIN_N=5; STEP_PX=28; scrolls horizontally; +n outlier label above whisker fence; left margin: campus/COL/n/dept count; right margin: threshold legend + sources
-- `vis/boulder-faculty-dept.html` — no campus data attributes (hardcoded)
+**Per-campus Regular Faculty department strip chart (shared JS, one HTML per campus):**
+- `js/campus-faculty-dept.js` — reads `data-campus-key` / `data-campus-label` from `<body>` dataset; filters `job_family === "Regular Faculty"` and `full_time_pct === "100"`; jittered strip + box/whisker by `dept_name`; MIN_N=5; STEP_PX=28; scrolls horizontally; +n outlier label above whisker fence; left margin: campus/COL/n/dept count; right margin: threshold legend + sources
+- HTML pages: `vis/boulder-faculty-dept.html`, `vis/anschutz-faculty-dept.html`, `vis/colorado-springs-faculty-dept.html`, `vis/denver-faculty-dept.html`
+- System Administration excluded (no Regular Faculty records)
+- Legacy `js/boulder-faculty-dept.js` kept as reference but pages now use the shared script
 
 **Per-campus department bubble chart (shared JS, one HTML per campus):**
 - `js/campus-dept-bubble.js` — reads `data-campus-key` / `data-campus-label` from `<body>` dataset; one bubble per `dept_name`; MIN_N=10; rScale range [8, 90]; 600 force ticks; dynamic SVG expansion post-simulation; tooltip on hover (dept, n, Q1/med/Q3); labels inside bubbles with r > 20

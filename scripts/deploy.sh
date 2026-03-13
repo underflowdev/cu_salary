@@ -21,4 +21,9 @@ aws s3 sync "$REPO_ROOT/data/" "s3://$BUCKET/$PREFIX/data/" \
   --exclude "progress.json" \
   --cache-control "max-age=3600"
 
+echo "Invalidating CloudFront distribution E37D288YP12YC0..."
+aws cloudfront create-invalidation \
+  --distribution-id E37D288YP12YC0 \
+  --paths "/*"
+
 echo "Done. Site live at https://underflow.dev/cu"
