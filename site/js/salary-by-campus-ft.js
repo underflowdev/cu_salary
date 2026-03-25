@@ -59,10 +59,16 @@ document.getElementById("col-toggle").addEventListener("change", () => {
   draw();
 });
 
+document.getElementById("outlier-toggle").addEventListener("change", () => {
+  d3.select("#vis-display").selectAll("*").remove();
+  draw();
+});
+
 // ── Draw ─────────────────────────────────────────────────────────────────────
 
 function draw() {
-  const colAdjusted = document.getElementById("col-toggle").checked;
+  const colAdjusted    = document.getElementById("col-toggle").checked;
+  const showOutliers   = document.getElementById("outlier-toggle").checked;
 
   const subtitle = document.getElementById("vis-subtitle");
   if (subtitle) {
@@ -98,6 +104,9 @@ function draw() {
   }, d => d.campus);
 
   const maxQ3 = d3.max(CAMPUS_ORDER, c => stats.get(c)?.q3 ?? 0);
+  const yMax  = showOutliers
+    ? d3.max(data, d => d.salary) * 1.05
+    : maxQ3 * 1.15;
 
   // ── Scales ─────────────────────────────────────────────────────────────────
 
@@ -107,7 +116,7 @@ function draw() {
     .padding(0.5);
 
   const yScale = d3.scaleLinear()
-    .domain([0, maxQ3 * 1.15])
+    .domain([0, yMax])
     .range([innerH, 0])
     .nice();
 
@@ -160,7 +169,7 @@ function draw() {
 
   g.append("g")
     .selectAll("circle")
-    .data(d3.shuffle([...data]).filter(d => d.salary <= (stats.get(d.campus)?.hi ?? Infinity)))
+    .data(d3.shuffle([...data]).filter(d => showOutliers || d.salary <= (stats.get(d.campus)?.hi ?? Infinity)))
     .join("circle")
       .attr("cx", d => xScale(d.campus) + jitter())
       .attr("cy", d => yScale(d.salary))
@@ -222,7 +231,7 @@ function draw() {
       .attr("stroke", "#fff").attr("stroke-width", 2).attr("opacity", 0.75);
 
     // "+n" label above the upper whisker fence
-    if (s.n_above > 0) {
+    if (!showOutliers && s.n_above > 0) {
       g.append("text")
         .attr("transform", `translate(${x}, ${yScale(hiDrawn) - 4}) rotate(-90)`)
         .attr("text-anchor", "start")

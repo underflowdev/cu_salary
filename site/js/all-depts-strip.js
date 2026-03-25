@@ -57,10 +57,16 @@ document.getElementById("col-toggle").addEventListener("change", () => {
   draw();
 });
 
+document.getElementById("outlier-toggle").addEventListener("change", () => {
+  d3.select("#vis-display").selectAll("*").remove();
+  draw();
+});
+
 // ── Draw ─────────────────────────────────────────────────────────────────────
 
 function draw() {
-  const colAdjusted = document.getElementById("col-toggle").checked;
+  const colAdjusted  = document.getElementById("col-toggle").checked;
+  const showOutliers = document.getElementById("outlier-toggle").checked;
 
   const subtitle = document.getElementById("vis-subtitle");
   if (subtitle) {
@@ -97,6 +103,9 @@ function draw() {
   }, d => d.dept);
 
   const maxQ3 = d3.max(groups, g => stats.get(g)?.q3 ?? 0);
+  const yMax  = showOutliers
+    ? d3.max(data, d => d.salary) * 1.05
+    : maxQ3 * 1.15;
 
   const margin = { top: 40, right: 30, bottom: 140, left: 85 };
   const H      = document.getElementById("vis-display").clientHeight || 680;
@@ -110,7 +119,7 @@ function draw() {
     .domain(groups).range([0, innerW]).padding(0.5);
 
   const yScale = d3.scaleLinear()
-    .domain([0, maxQ3 * 1.15]).range([innerH, 0]).nice();
+    .domain([0, yMax]).range([innerH, 0]).nice();
 
   const yTop = yScale.domain()[1];
   const bandwidth = xScale.step() * 0.3;
@@ -141,7 +150,7 @@ function draw() {
 
   g.append("g")
     .selectAll("circle")
-    .data(d3.shuffle([...data]).filter(d => d.salary <= (stats.get(d.dept)?.hi ?? Infinity)))
+    .data(d3.shuffle([...data]).filter(d => showOutliers || d.salary <= (stats.get(d.dept)?.hi ?? Infinity)))
     .join("circle")
       .attr("cx", d => xScale(d.dept) + jitter()).attr("cy", d => yScale(d.salary))
       .attr("r", 1.5).attr("fill", d => COLOR(d.dept)).attr("opacity", 0.25);
@@ -179,7 +188,7 @@ function draw() {
       .attr("y1", yScale(s.med)).attr("y2", yScale(s.med))
       .attr("stroke", "#fff").attr("stroke-width", 2).attr("opacity", 0.75);
 
-    if (s.n_above > 0) {
+    if (!showOutliers && s.n_above > 0) {
       g.append("text")
         .attr("transform", `translate(${x}, ${yScale(hiDrawn) - 4}) rotate(-90)`)
         .attr("text-anchor", "start").attr("dominant-baseline", "middle")
@@ -235,7 +244,7 @@ function draw() {
       <div style="font-size:0.72rem;color:#555;margin-top:1rem;line-height:1.6;">
         ${poolNote}<br>
         Sorted by median.<br>
-        +n above each column = pts<br>above Q3 not drawn.<br>
+        +n above each column = pts<br>above whisker fence; toggle<br>"Show outliers" to display.<br>
         Depts with &lt; ${MIN_N} FTE excluded.<br><br>
         <strong style="color:#444;">Sources</strong><br>
         Salaries: <a href="https://www.cu.edu/budget/cu-salary-database" target="_blank" style="color:#555;">CU Salary Database</a><br>
