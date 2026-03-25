@@ -133,7 +133,7 @@ function draw() {
     .call(d3.axisBottom(xScale).tickSize(0).tickFormat(d => `${d} (${d3.format(",")(stats.get(d)?.count ?? 0)})`))
     .call(ax => ax.select(".domain").remove())
     .selectAll("text")
-      .style("font-size", "9px").style("fill", "#ccc")
+      .style("font-size", "9px").style("fill", d => COLOR(d))
       .attr("transform", "rotate(-55)").attr("text-anchor", "end")
       .attr("dx", "-0.4em").attr("dy", "0.6em");
 
