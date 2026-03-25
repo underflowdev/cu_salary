@@ -84,7 +84,7 @@ All salaries are COL-adjusted (divided by `cost_of_living` from `metadata.json`)
 - Boulder page previously used `js/campus-boulder-bubble.js` (now deleted in favor of shared script)
 
 **Per-campus detail (shared JS, one HTML per campus):**
-- `js/salary-by-jobfamily.js` — reads `data-campus-key` / `data-campus-label` from `<body>` dataset; X-axis = job_family sorted by median descending; malformed rows excluded by numeric `full_time_pct` filter; full-width wage threshold lines; right margin: threshold legend with dollar amounts + sources
+- `js/salary-by-jobfamily.js` — reads `data-campus-key` / `data-campus-label` from `<body>` dataset; X-axis = job_family sorted by median descending; X-axis labels colored by job family (Tableau10); malformed rows excluded by numeric `full_time_pct` filter; full-width wage threshold lines; right margin: threshold legend with dollar amounts + sources
 - `vis/campus-boulder.html`, `vis/campus-anschutz.html`, `vis/campus-denver.html`, `vis/campus-colorado-springs.html`, `vis/campus-system-administration.html`
 - Detail pages use `grid-template-columns: 130px 1fr 150px` (narrower margins than the CSS default `200px 1fr 200px`)
 

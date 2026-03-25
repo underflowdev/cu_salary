@@ -64,7 +64,7 @@ Syncs `site/` → `s3://underflow.dev/cu/` and `data/` → `s3://underflow.dev/c
 - Salary Bubble Chart Side by Side — campus columns sharing a common Y axis
 
 **Per campus** (Anschutz, Boulder, Colorado Springs, Denver, System Administration)
-- By Job Family — strip chart with box-and-whisker, sorted by median COL-adjusted salary
+- By Job Family — strip chart with box-and-whisker, sorted by median COL-adjusted salary; X-axis labels colored by job family
 - Bubble Chart — one bubble per job family, area ∝ headcount, Y position = median salary
 
 All salaries are COL-adjusted (divided by a cost-of-living index relative to national baseline, sourced from BestPlaces.net). Indices are stored in `metadata.json`.
