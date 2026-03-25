@@ -30,6 +30,11 @@ function parseSalary(s) {
   return parseFloat((s || "").replace(/[$,]/g, "")) || 0;
 }
 
+// ── Module state ─────────────────────────────────────────────────────────────
+
+let rawData    = null;
+let campusMeta = null;
+
 // ── Load metadata + all CSVs ─────────────────────────────────────────────────
 
 Promise.all([
@@ -42,18 +47,34 @@ Promise.all([
   ),
 ]).then(([metaJson, ...chunks]) => {
   const rawMeta = metaJson.metadata;
-  const campusMeta = Object.fromEntries(
+  campusMeta = Object.fromEntries(
     CAMPUS_ORDER.map(label => [label, rawMeta[CAMPUS_META_KEY[label]]])
   );
-  const data = chunks.flat()
-    .filter(d => d.salary > 0)
-    .map(d => ({ ...d, salary: d.salary / campusMeta[d.campus].cost_of_living }));
-  draw(data, campusMeta);
+  rawData = chunks.flat().filter(d => d.salary > 0);
+  draw();
+});
+
+document.getElementById("col-toggle").addEventListener("change", () => {
+  d3.select("#vis-display").selectAll("*").remove();
+  draw();
 });
 
 // ── Draw ─────────────────────────────────────────────────────────────────────
 
-function draw(data, campusMeta) {
+function draw() {
+  const colAdjusted = document.getElementById("col-toggle").checked;
+
+  const subtitle = document.getElementById("vis-subtitle");
+  if (subtitle) {
+    subtitle.textContent = (colAdjusted ? "COL-adjusted annual base salary" : "Annual base salary (not COL-adjusted)")
+      + " · FY 2025–26 · One dot per employee · 100% FTE appointments only";
+  }
+
+  const data = rawData.map(d => ({
+    ...d,
+    salary: colAdjusted ? d.salary / campusMeta[d.campus].cost_of_living : d.salary,
+  }));
+
   const container = document.getElementById("vis-display");
   const W = container.clientWidth  || 900;
   const H = container.clientHeight || 640;
@@ -133,9 +154,9 @@ function draw(data, campusMeta) {
     .attr("text-anchor", "middle")
     .style("fill", "#888")
     .style("font-size", "12px")
-    .text("COL-Adjusted Annual Salary");
+    .text(colAdjusted ? "COL-Adjusted Annual Salary" : "Annual Salary");
 
-  // ── Dots (only salary ≤ group Q3) ───────────────────────────────────────
+  // ── Dots (only salary ≤ group hi fence) ──────────────────────────────────
 
   g.append("g")
     .selectAll("circle")
@@ -214,7 +235,7 @@ function draw(data, campusMeta) {
   });
 
   // ── Wage threshold markers ───────────────────────────────────────────────
-  // Values are COL-adjusted (wage × 2080 ÷ COL) to match the Y axis scale.
+  // When COL-adjusted: wage × 2080 ÷ COL.  When raw: wage × 2080.
 
   const WAGE_MARKERS = [
     { key: "living_wage_1_adult_0_children",  label: "Living wage (1 adult)",  color: "#52b052", dash: "9,3"  },
@@ -228,7 +249,9 @@ function draw(data, campusMeta) {
     const x = xScale(campus);
 
     WAGE_MARKERS.forEach(({ key, color, dash }) => {
-      const val = m[key] * HOURS_PER_YEAR / m.cost_of_living;
+      const val = colAdjusted
+        ? m[key] * HOURS_PER_YEAR / m.cost_of_living
+        : m[key] * HOURS_PER_YEAR;
       if (val > yTop) return;
       g.append("line")
         .attr("x1", x - markerHalfW).attr("x2", x + markerHalfW)
@@ -250,11 +273,13 @@ function draw(data, campusMeta) {
       const s = stats.get(campus);
       const m = campusMeta[campus];
       if (!s) return "";
+      const colLine = colAdjusted
+        ? `<br>COL ×${m.cost_of_living.toFixed(2)}`
+        : "";
       return `<div style="margin-bottom:1.4rem;">
         <div style="color:${COLOR(campus)};font-weight:bold;margin-bottom:0.3rem;">${campus}</div>
         <div style="font-size:0.78rem;color:#aaa;line-height:1.6;">
-          n = ${d3.format(",")(s.count)}<br>
-          COL ×${m.cost_of_living.toFixed(2)}<br>
+          n = ${d3.format(",")(s.count)}${colLine}<br>
           Q1 &nbsp;&nbsp;$${fmt(s.q1)}<br>
           med &nbsp;$${fmt(s.med)}<br>
           Q3 &nbsp;&nbsp;$${fmt(s.q3)}
@@ -266,6 +291,9 @@ function draw(data, campusMeta) {
   const rightSide = document.getElementById("annotation-right") ||
                     document.querySelector("#margin-right");
   if (rightSide) {
+    const wageNote = colAdjusted
+      ? "Hourly wage × 2,080 hrs, COL-adjusted."
+      : "Hourly wage × 2,080 hrs (not COL-adjusted).";
     rightSide.innerHTML = `
       <div style="font-size:0.8rem;color:#aaa;margin-bottom:0.6rem;font-weight:bold;">Wage thresholds</div>
       <div style="font-size:0.75rem;color:#aaa;line-height:1.8;">
@@ -277,7 +305,7 @@ function draw(data, campusMeta) {
         }).join("")}
       </div>
       <div style="font-size:0.72rem;color:#555;margin-top:1rem;line-height:1.6;">
-        Hourly wage × 2,080 hrs, COL-adjusted.<br><br>
+        ${wageNote}<br><br>
         <strong style="color:#444;">Sources</strong><br>
         Salaries: <a href="https://www.cu.edu/budget/cu-salary-database" target="_blank" style="color:#555;">CU Salary Database</a><br>
         Cost of living: <a href="https://www.bestplaces.net/" target="_blank" style="color:#555;">BestPlaces.net</a><br>

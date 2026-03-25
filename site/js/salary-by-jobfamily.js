@@ -19,28 +19,50 @@ function parseSalary(s) {
   return parseFloat((s || "").replace(/[$,]/g, "")) || 0;
 }
 
+// ── Module state ─────────────────────────────────────────────────────────────
+
+let rawData = null;
+let meta    = null;
+
 // ── Load ─────────────────────────────────────────────────────────────────────
 
 Promise.all([
   d3.json("/cu/data/metadata.json"),
   d3.csv(CSV_FILE),
 ]).then(([metaJson, rows]) => {
-  const meta = metaJson.metadata[CAMPUS_KEY];
+  meta = metaJson.metadata[CAMPUS_KEY];
 
-  const data = rows
+  rawData = rows
     .filter(r => r.full_time_pct === "100" && parseSalary(r.total) > 0)
-    .map(r => ({
-      family: r.job_family.trim(),
-      salary: parseSalary(r.total) / meta.cost_of_living,
-    }))
+    .map(r => ({ family: r.job_family.trim(), rawSalary: parseSalary(r.total) }))
     .filter(d => d.family);
 
-  draw(data, meta);
+  draw();
+});
+
+document.getElementById("col-toggle").addEventListener("change", () => {
+  d3.select("#vis-display").selectAll("*").remove();
+  draw();
 });
 
 // ── Draw ─────────────────────────────────────────────────────────────────────
 
-function draw(data, meta) {
+function draw() {
+  const colAdjusted = document.getElementById("col-toggle").checked;
+
+  const subtitle = document.getElementById("vis-subtitle");
+  if (subtitle) {
+    if (!subtitle.dataset.orig) subtitle.dataset.orig = subtitle.textContent;
+    subtitle.textContent = colAdjusted
+      ? subtitle.dataset.orig
+      : subtitle.dataset.orig.replace(/COL-adjusted/gi, "unadjusted");
+  }
+
+  const data = rawData.map(d => ({
+    ...d,
+    salary: colAdjusted ? d.rawSalary / meta.cost_of_living : d.rawSalary,
+  }));
+
   const container = document.getElementById("vis-display");
   const W = container.clientWidth  || 1200;
   const H = container.clientHeight || 680;
@@ -57,7 +79,7 @@ function draw(data, meta) {
 
   const COLOR = d3.scaleOrdinal(d3.schemeTableau10).domain(groups);
 
-  // ── Stats (computed before scales — Q3 values set the y-axis top) ─────────
+  // ── Stats ─────────────────────────────────────────────────────────────────
 
   const stats = d3.rollup(data, v => {
     const sorted = v.map(d => d.salary).sort(d3.ascending);
@@ -73,25 +95,24 @@ function draw(data, meta) {
 
   const maxQ3 = d3.max(groups, g => stats.get(g)?.q3 ?? 0);
 
-  // ── Scales ──────────────────────────────────────────────────────────────────
+  // ── Scales ────────────────────────────────────────────────────────────────
 
   const xScale = d3.scalePoint()
     .domain(groups)
     .range([0, innerW])
     .padding(0.5);
 
-  // Y domain tops out at max Q3 + 15% headroom for "+n" labels
   const yScale = d3.scaleLinear()
     .domain([0, maxQ3 * 1.15])
     .range([innerH, 0])
     .nice();
 
-  const yTop = yScale.domain()[1]; // actual top after nice()
+  const yTop = yScale.domain()[1];
 
   const bandwidth = xScale.step() * 0.3;
   const jitter    = d3.randomUniform(-bandwidth, bandwidth);
 
-  // ── Axes ────────────────────────────────────────────────────────────────────
+  // ── Axes ──────────────────────────────────────────────────────────────────
 
   const svg = d3.select("#vis-display").append("svg")
     .attr("width",  W)
@@ -132,9 +153,9 @@ function draw(data, meta) {
     .attr("text-anchor", "middle")
     .style("fill", "#888")
     .style("font-size", "12px")
-    .text("COL-Adjusted Annual Salary");
+    .text(colAdjusted ? "COL-Adjusted Annual Salary" : "Annual Salary");
 
-  // ── Dots (only salary ≤ group Q3) ───────────────────────────────────────
+  // ── Dots ──────────────────────────────────────────────────────────────────
 
   g.append("g")
     .selectAll("circle")
@@ -146,7 +167,7 @@ function draw(data, meta) {
       .attr("fill", d => COLOR(d.family))
       .attr("opacity", 0.35);
 
-  // ── Box and whisker overlays ─────────────────────────────────────────────
+  // ── Box and whisker ───────────────────────────────────────────────────────
 
   const boxW     = bandwidth * 1.1;
   const whiskerW = boxW * 0.45;
@@ -157,87 +178,70 @@ function draw(data, meta) {
     const x     = xScale(family);
     const color = COLOR(family);
 
-    // Lower whisker
-    g.append("line")
-      .attr("x1", x).attr("x2", x)
+    g.append("line").attr("x1", x).attr("x2", x)
       .attr("y1", yScale(s.lo)).attr("y2", yScale(s.q1))
       .attr("stroke", color).attr("stroke-width", 1.5).attr("opacity", 0.6);
 
-    // Lower fence cap
-    g.append("line")
-      .attr("x1", x - whiskerW).attr("x2", x + whiskerW)
+    g.append("line").attr("x1", x - whiskerW).attr("x2", x + whiskerW)
       .attr("y1", yScale(s.lo)).attr("y2", yScale(s.lo))
       .attr("stroke", color).attr("stroke-width", 1.5).attr("opacity", 0.6);
 
-    // Upper whisker — capped at yTop so it doesn't escape the chart
     const hiDrawn = Math.min(s.hi, yTop);
-    g.append("line")
-      .attr("x1", x).attr("x2", x)
+    g.append("line").attr("x1", x).attr("x2", x)
       .attr("y1", yScale(s.q3)).attr("y2", yScale(hiDrawn))
       .attr("stroke", color).attr("stroke-width", 1.5).attr("opacity", 0.6);
 
-    // Upper fence cap — only if the fence is within the chart
     if (s.hi <= yTop) {
-      g.append("line")
-        .attr("x1", x - whiskerW).attr("x2", x + whiskerW)
+      g.append("line").attr("x1", x - whiskerW).attr("x2", x + whiskerW)
         .attr("y1", yScale(s.hi)).attr("y2", yScale(s.hi))
         .attr("stroke", color).attr("stroke-width", 1.5).attr("opacity", 0.6);
     }
 
-    // IQR box
     g.append("rect")
-      .attr("x", x - boxW)
-      .attr("y", yScale(s.q3))
-      .attr("width", boxW * 2)
-      .attr("height", yScale(s.q1) - yScale(s.q3))
+      .attr("x", x - boxW).attr("y", yScale(s.q3))
+      .attr("width", boxW * 2).attr("height", yScale(s.q1) - yScale(s.q3))
       .attr("fill", color).attr("fill-opacity", 0.12)
       .attr("stroke", color).attr("stroke-width", 1.5).attr("opacity", 0.75);
 
-    // Median line
-    g.append("line")
-      .attr("x1", x - boxW).attr("x2", x + boxW)
+    g.append("line").attr("x1", x - boxW).attr("x2", x + boxW)
       .attr("y1", yScale(s.med)).attr("y2", yScale(s.med))
       .attr("stroke", "#fff").attr("stroke-width", 2).attr("opacity", 0.75);
 
-    // "+n" label above the upper whisker fence for points not drawn
     if (s.n_above > 0) {
       g.append("text")
         .attr("transform", `translate(${x}, ${yScale(hiDrawn) - 4}) rotate(-90)`)
-        .attr("text-anchor", "start")
-        .attr("dominant-baseline", "middle")
-        .style("font-size", "9px")
-        .style("fill", color)
-        .style("opacity", 0.8)
+        .attr("text-anchor", "start").attr("dominant-baseline", "middle")
+        .style("font-size", "9px").style("fill", color).style("opacity", 0.8)
         .text(`+${s.n_above}`);
     }
   });
 
-  // ── Wage threshold lines (full width, only if within y range) ────────────
+  // ── Wage threshold lines ──────────────────────────────────────────────────
 
   WAGE_MARKERS.forEach(({ key, color, dash }) => {
-    const val = meta[key] * HOURS_PER_YEAR / meta.cost_of_living;
+    const val = colAdjusted
+      ? meta[key] * HOURS_PER_YEAR / meta.cost_of_living
+      : meta[key] * HOURS_PER_YEAR;
     if (val > yTop) return;
-    const y = yScale(val);
     g.append("line")
       .attr("x1", 0).attr("x2", innerW)
-      .attr("y1", y).attr("y2", y)
-      .attr("stroke", color)
-      .attr("stroke-width", 1.5)
-      .attr("stroke-dasharray", dash)
-      .attr("opacity", 0.7);
+      .attr("y1", yScale(val)).attr("y2", yScale(val))
+      .attr("stroke", color).attr("stroke-width", 1.5)
+      .attr("stroke-dasharray", dash).attr("opacity", 0.7);
   });
 
-  // ── Annotations ──────────────────────────────────────────────────────────
+  // ── Annotations ───────────────────────────────────────────────────────────
 
   const fmt      = d3.format(",.0f");
   const leftSide = document.getElementById("margin-left");
   if (leftSide) {
+    const colLine = colAdjusted
+      ? `COL ×${meta.cost_of_living.toFixed(2)}<br>` : "";
     leftSide.innerHTML = `
       <div style="font-size:0.8rem;color:#aaa;margin-bottom:1rem;">
         <div style="font-weight:bold;margin-bottom:0.4rem;">${CAMPUS_LABEL}</div>
         <div style="line-height:1.7;font-size:0.75rem;">
-          COL ×${meta.cost_of_living.toFixed(2)}<br>
-          ${meta.city}<br>
+          ${colLine}${meta.city}<br>
           n = ${d3.format(",")(data.length)}
         </div>
       </div>`;
@@ -245,11 +249,16 @@ function draw(data, meta) {
 
   const rightSide = document.getElementById("margin-right");
   if (rightSide) {
+    const wageNote = colAdjusted
+      ? "Hourly × 2,080 hrs,<br>COL-adjusted."
+      : "Hourly × 2,080 hrs<br>(not COL-adjusted).";
     rightSide.innerHTML = `
       <div style="font-size:0.8rem;color:#aaa;margin-bottom:0.6rem;font-weight:bold;">Wage thresholds</div>
       <div style="font-size:0.75rem;color:#aaa;line-height:1.8;">
         ${WAGE_MARKERS.map(({ key, label, color, dash }) => {
-          const annual = meta[key] * HOURS_PER_YEAR / meta.cost_of_living;
+          const annual = colAdjusted
+            ? meta[key] * HOURS_PER_YEAR / meta.cost_of_living
+            : meta[key] * HOURS_PER_YEAR;
           const svgEl = `<svg width="24" height="10" style="vertical-align:middle;margin-right:6px;">
             <line x1="0" y1="5" x2="24" y2="5" stroke="${color}" stroke-width="1.5"
               stroke-dasharray="${dash}"/></svg>`;
@@ -257,7 +266,7 @@ function draw(data, meta) {
         }).join("")}
       </div>
       <div style="font-size:0.72rem;color:#555;margin-top:1rem;line-height:1.6;">
-        Hourly × 2,080 hrs,<br>COL-adjusted.<br>
+        ${wageNote}<br>
         Groups sorted by median.<br>
         +n above each column = pts<br>above Q3 not drawn.<br><br>
         <strong style="color:#444;">Sources</strong><br>

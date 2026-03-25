@@ -30,6 +30,18 @@ body {
 }
 .back-link:hover { color: #999; }
 
+.col-toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+  font-size: 0.8rem;
+  color: #777;
+  cursor: pointer;
+  user-select: none;
+}
+.col-toggle-label input { cursor: pointer; accent-color: #76b7b2; }
+
 /* ── Main: left annotation | display | right annotation ─────────── */
 #vis-main {
   display: grid;

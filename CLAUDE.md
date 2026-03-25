@@ -64,7 +64,7 @@ All salaries are COL-adjusted (divided by `cost_of_living` from `metadata.json`)
 **`metadata.json`** (`data/metadata.json`, served at `/cu/data/metadata.json`) — per-campus COL index and wage thresholds. Keys: `boulder`, `anschutz`, `colorado_springs`, `denver`, `system_administration`. Each entry: `cost_of_living`, `city`, `county`, `living_wage_1_adult_0_children`, `poverty_wage`, `minimum_wage`, `median_wage`.
 
 **Campus overview:**
-- `vis/salary-by-campus-ft.html` + `js/salary-by-campus-ft.js` — jittered strip chart, full-time employees only (`full_time_pct === "100"`); salary on Y, campus on X (alphabetical left-to-right); box-and-whisker overlay (de-emphasized); left margin: n / COL / Q1 / median / Q3; right margin: wage threshold legend + sources
+- `vis/salary-by-campus-ft.html` + `js/salary-by-campus-ft.js` — jittered strip chart, full-time employees only (`full_time_pct === "100"`); salary on Y, campus on X (alphabetical left-to-right); box-and-whisker overlay (de-emphasized); left margin: n / COL / Q1 / median / Q3; right margin: wage threshold legend + sources; header checkbox toggles COL adjustment on/off and re-renders without reloading data; raw data held at module scope, COL applied inside `draw()` based on checkbox state
 
 **All-campuses strip chart:**
 - `vis/all-campuses-strip.html` + `js/all-campuses-strip.js` — jittered strip chart, all campuses pooled; COL-adjusted per campus before pooling; X-axis = job_family sorted by median descending; X-axis labels colored by job family (Tableau10); box-and-whisker overlay; wage thresholds = average COL-adjusted across all campuses; dots `opacity=0.25` (lower than per-campus charts due to density); left margin: total n / family count; right margin: threshold legend with dollar amounts + sources
@@ -74,7 +74,7 @@ All salaries are COL-adjusted (divided by `cost_of_living` from `metadata.json`)
 - `vis/multi-campus-bubble.html` + `js/multi-campus-bubble.js` — one bubble per (campus × job family); campus columns share a Y axis (median COL-adjusted salary); campuses always displayed alphabetically left-to-right (Anschutz, Boulder, Colorado Springs, Denver, System Admin); per-column wage marker dashes (`markerHalfW = xScale.step() * 0.44`); force: `forceX` toward campus center (strength=0.3), `forceY` toward salary target (strength=0.4), 300 ticks
 
 **All-campuses department charts:**
-- `vis/all-depts-strip.html` + `js/all-depts-strip.js` — jittered strip + box/whisker by `dept_name`; all campuses pooled, COL-adjusted per campus; MIN_N=55 (system-wide headcount; yields ~108 depts); same-named depts at different campuses merged; wage thresholds = average COL-adjusted; STEP_PX=28; scrolls horizontally; left margin: n / dept count; right margin: threshold legend + sources
+- `vis/all-depts-strip.html` + `js/all-depts-strip.js` — jittered strip + box/whisker by `dept_name`; all campuses pooled, COL-adjusted per campus; MIN_N=20 (system-wide headcount); same-named depts at different campuses merged; wage thresholds = average COL-adjusted; STEP_PX=28; scrolls horizontally; left margin: n / dept count; right margin: threshold legend + sources
 - `vis/all-depts-bubble.html` + `js/all-depts-bubble.js` — one bubble per `dept_name` system-wide; MIN_N=55; rScale range [8, 90]; 600 force ticks; dynamic SVG expansion post-simulation; tooltip on hover; labels inside bubbles r > 20; wage thresholds = average COL-adjusted; right margin: n / dept count + threshold legend + sources
 
 **Per-campus bubble chart (shared JS, one HTML per campus):**

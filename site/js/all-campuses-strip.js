@@ -1,7 +1,5 @@
 // System-wide strip chart: one dot per employee, grouped by job family.
-// All campuses pooled; each salary COL-adjusted by campus before aggregation.
-// Dots above each group's Q3 are replaced by a vertical "+n" count label
-// drawn just above the upper whisker fence. Y-axis is scaled to max(Q3) + padding.
+// All campuses pooled; COL adjustment toggled via header checkbox.
 
 const FILES = {
   boulder:               "/cu/data/2026_boulder.csv",
@@ -23,6 +21,11 @@ function parseSalary(s) {
   return parseFloat((s || "").replace(/[$,]/g, "")) || 0;
 }
 
+// ── Module state ─────────────────────────────────────────────────────────────
+
+let rawData = null;
+let metaAll = null;
+
 // ── Load ─────────────────────────────────────────────────────────────────────
 
 Promise.all([
@@ -31,22 +34,45 @@ Promise.all([
     d3.csv(path).then(rows => ({ key, rows }))
   ),
 ]).then(([metaJson, ...chunks]) => {
-  const meta = metaJson.metadata;
+  metaAll = metaJson.metadata;
 
-  const data = chunks.flatMap(({ key, rows }) => {
-    const col = meta[key].cost_of_living;
-    return rows
+  rawData = chunks.flatMap(({ key, rows }) =>
+    rows
       .filter(r => r.full_time_pct === "100" && parseSalary(r.total) > 0)
-      .map(r => ({ family: r.job_family.trim(), salary: parseSalary(r.total) / col }))
-      .filter(d => d.family);
-  });
+      .map(r => ({ campusKey: key, family: r.job_family.trim(), rawSalary: parseSalary(r.total) }))
+      .filter(d => d.family)
+  );
 
-  draw(data, meta);
+  draw();
+});
+
+document.getElementById("col-toggle").addEventListener("change", () => {
+  d3.select("#vis-display").selectAll("*").remove();
+  draw();
 });
 
 // ── Draw ─────────────────────────────────────────────────────────────────────
 
-function draw(data, meta) {
+function draw() {
+  const colAdjusted = document.getElementById("col-toggle").checked;
+
+  const subtitle = document.getElementById("vis-subtitle");
+  if (subtitle) {
+    if (!subtitle.dataset.orig) subtitle.dataset.orig = subtitle.textContent;
+    subtitle.textContent = colAdjusted
+      ? subtitle.dataset.orig
+      : subtitle.dataset.orig.replace(/COL-adjusted/gi, "unadjusted");
+  }
+
+  const data = rawData.map(d => ({
+    ...d,
+    salary: colAdjusted
+      ? d.rawSalary / metaAll[d.campusKey].cost_of_living
+      : d.rawSalary,
+  }));
+
+  const campusMetas = Object.values(metaAll);
+
   const container = document.getElementById("vis-display");
   const W = container.clientWidth  || 1200;
   const H = container.clientHeight || 680;
@@ -55,15 +81,12 @@ function draw(data, meta) {
   const innerW = W - margin.left - margin.right;
   const innerH = H - margin.top  - margin.bottom;
 
-  // Sort groups by median salary descending
   const groupMedians = d3.rollup(data, v => d3.median(v, d => d.salary), d => d.family);
   const groups = [...groupMedians.entries()]
     .sort((a, b) => b[1] - a[1])
     .map(([g]) => g);
 
   const COLOR = d3.scaleOrdinal(d3.schemeTableau10).domain(groups);
-
-  // ── Stats (computed before scales — Q3 values set the y-axis top) ─────────
 
   const stats = d3.rollup(data, v => {
     const sorted  = v.map(d => d.salary).sort(d3.ascending);
@@ -79,159 +102,99 @@ function draw(data, meta) {
 
   const maxQ3 = d3.max(groups, g => stats.get(g)?.q3 ?? 0);
 
-  // ── Scales ────────────────────────────────────────────────────────────────
-
   const xScale = d3.scalePoint()
-    .domain(groups)
-    .range([0, innerW])
-    .padding(0.5);
+    .domain(groups).range([0, innerW]).padding(0.5);
 
   const yScale = d3.scaleLinear()
-    .domain([0, maxQ3 * 1.15])
-    .range([innerH, 0])
-    .nice();
+    .domain([0, maxQ3 * 1.15]).range([innerH, 0]).nice();
 
   const yTop = yScale.domain()[1];
+  const bandwidth = xScale.step() * 0.3;
+  const jitter    = d3.randomUniform(-bandwidth, bandwidth);
 
-  const bandwidth  = xScale.step() * 0.3;
-  const jitter     = d3.randomUniform(-bandwidth, bandwidth);
-
-  // ── Axes ──────────────────────────────────────────────────────────────────
-
-  const svg = d3.select("#vis-display").append("svg")
-    .attr("width",  W)
-    .attr("height", H);
-
-  const g = svg.append("g")
-    .attr("transform", `translate(${margin.left},${margin.top})`);
+  const svg = d3.select("#vis-display").append("svg").attr("width", W).attr("height", H);
+  const g   = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
   g.append("g")
     .attr("transform", `translate(0,${innerH})`)
     .call(d3.axisBottom(xScale).tickSize(0))
     .call(ax => ax.select(".domain").remove())
     .selectAll("text")
-      .style("font-size", "11px")
-      .style("fill", d => COLOR(d))
-      .attr("transform", "rotate(-40)")
-      .attr("text-anchor", "end")
-      .attr("dx", "-0.4em")
-      .attr("dy", "0.6em");
+      .style("font-size", "11px").style("fill", d => COLOR(d))
+      .attr("transform", "rotate(-40)").attr("text-anchor", "end")
+      .attr("dx", "-0.4em").attr("dy", "0.6em");
 
   g.append("g")
-    .call(
-      d3.axisLeft(yScale)
-        .ticks(8)
-        .tickFormat(d => "$" + d3.format(",.0f")(d))
-    )
+    .call(d3.axisLeft(yScale).ticks(8).tickFormat(d => "$" + d3.format(",.0f")(d)))
     .call(ax => ax.select(".domain").remove())
-    .call(ax => ax.selectAll(".tick line")
-      .clone().attr("x2", innerW).attr("stroke", "#2a2a2a"))
-    .selectAll("text")
-      .style("font-size", "11px")
-      .style("fill", "#aaa");
+    .call(ax => ax.selectAll(".tick line").clone().attr("x2", innerW).attr("stroke", "#2a2a2a"))
+    .selectAll("text").style("font-size", "11px").style("fill", "#aaa");
 
   g.append("text")
-    .attr("transform", "rotate(-90)")
-    .attr("x", -innerH / 2)
-    .attr("y", -68)
-    .attr("text-anchor", "middle")
-    .style("fill", "#888")
-    .style("font-size", "12px")
-    .text("COL-Adjusted Annual Salary");
-
-  // ── Dots (only salary ≤ group Q3) ────────────────────────────────────────
+    .attr("transform", "rotate(-90)").attr("x", -innerH / 2).attr("y", -68)
+    .attr("text-anchor", "middle").style("fill", "#888").style("font-size", "12px")
+    .text(colAdjusted ? "COL-Adjusted Annual Salary" : "Annual Salary");
 
   g.append("g")
     .selectAll("circle")
     .data(d3.shuffle([...data]).filter(d => d.salary <= (stats.get(d.family)?.hi ?? Infinity)))
     .join("circle")
-      .attr("cx", d => xScale(d.family) + jitter())
-      .attr("cy", d => yScale(d.salary))
-      .attr("r", 1.5)
-      .attr("fill", d => COLOR(d.family))
-      .attr("opacity", 0.25);
+      .attr("cx", d => xScale(d.family) + jitter()).attr("cy", d => yScale(d.salary))
+      .attr("r", 1.5).attr("fill", d => COLOR(d.family)).attr("opacity", 0.25);
 
-  // ── Box and whisker overlays ──────────────────────────────────────────────
-
-  const boxW     = bandwidth * 1.1;
-  const whiskerW = boxW * 0.45;
+  const boxW = bandwidth * 1.1, whiskerW = boxW * 0.45;
 
   groups.forEach(family => {
     const s = stats.get(family);
     if (!s) return;
-    const x     = xScale(family);
-    const color = COLOR(family);
+    const x = xScale(family), color = COLOR(family);
 
-    // Lower whisker
-    g.append("line")
-      .attr("x1", x).attr("x2", x)
+    g.append("line").attr("x1", x).attr("x2", x)
       .attr("y1", yScale(s.lo)).attr("y2", yScale(s.q1))
       .attr("stroke", color).attr("stroke-width", 1.5).attr("opacity", 0.6);
-
-    // Lower fence cap
-    g.append("line")
-      .attr("x1", x - whiskerW).attr("x2", x + whiskerW)
+    g.append("line").attr("x1", x - whiskerW).attr("x2", x + whiskerW)
       .attr("y1", yScale(s.lo)).attr("y2", yScale(s.lo))
       .attr("stroke", color).attr("stroke-width", 1.5).attr("opacity", 0.6);
 
-    // Upper whisker — capped at yTop
     const hiDrawn = Math.min(s.hi, yTop);
-    g.append("line")
-      .attr("x1", x).attr("x2", x)
+    g.append("line").attr("x1", x).attr("x2", x)
       .attr("y1", yScale(s.q3)).attr("y2", yScale(hiDrawn))
       .attr("stroke", color).attr("stroke-width", 1.5).attr("opacity", 0.6);
-
-    // Upper fence cap — only if within chart
     if (s.hi <= yTop) {
-      g.append("line")
-        .attr("x1", x - whiskerW).attr("x2", x + whiskerW)
+      g.append("line").attr("x1", x - whiskerW).attr("x2", x + whiskerW)
         .attr("y1", yScale(s.hi)).attr("y2", yScale(s.hi))
         .attr("stroke", color).attr("stroke-width", 1.5).attr("opacity", 0.6);
     }
 
-    // IQR box
     g.append("rect")
-      .attr("x", x - boxW)
-      .attr("y", yScale(s.q3))
-      .attr("width", boxW * 2)
-      .attr("height", yScale(s.q1) - yScale(s.q3))
+      .attr("x", x - boxW).attr("y", yScale(s.q3))
+      .attr("width", boxW * 2).attr("height", yScale(s.q1) - yScale(s.q3))
       .attr("fill", color).attr("fill-opacity", 0.12)
       .attr("stroke", color).attr("stroke-width", 1.5).attr("opacity", 0.75);
-
-    // Median line
-    g.append("line")
-      .attr("x1", x - boxW).attr("x2", x + boxW)
+    g.append("line").attr("x1", x - boxW).attr("x2", x + boxW)
       .attr("y1", yScale(s.med)).attr("y2", yScale(s.med))
       .attr("stroke", "#fff").attr("stroke-width", 2).attr("opacity", 0.75);
 
-    // "+n" label above the upper whisker fence
     if (s.n_above > 0) {
       g.append("text")
         .attr("transform", `translate(${x}, ${yScale(hiDrawn) - 4}) rotate(-90)`)
-        .attr("text-anchor", "start")
-        .attr("dominant-baseline", "middle")
-        .style("font-size", "9px")
-        .style("fill", color)
-        .style("opacity", 0.8)
+        .attr("text-anchor", "start").attr("dominant-baseline", "middle")
+        .style("font-size", "9px").style("fill", color).style("opacity", 0.8)
         .text(`+${s.n_above}`);
     }
   });
 
-  // ── Wage threshold lines (avg COL-adjusted, only if within y range) ───────
-
-  const campusMetas = Object.values(meta);
   WAGE_MARKERS.forEach(({ key, color, dash }) => {
-    const avg = d3.mean(campusMetas, m => m[key] * HOURS_PER_YEAR / m.cost_of_living);
+    const avg = colAdjusted
+      ? d3.mean(campusMetas, m => m[key] * HOURS_PER_YEAR / m.cost_of_living)
+      : d3.mean(campusMetas, m => m[key] * HOURS_PER_YEAR);
     if (avg > yTop) return;
-    const y = yScale(avg);
     g.append("line")
       .attr("x1", 0).attr("x2", innerW)
-      .attr("y1", y).attr("y2", y)
+      .attr("y1", yScale(avg)).attr("y2", yScale(avg))
       .attr("stroke", color).attr("stroke-width", 1.5)
       .attr("stroke-dasharray", dash).attr("opacity", 0.7);
   });
-
-  // ── Annotations ───────────────────────────────────────────────────────────
 
   const fmt      = d3.format(",.0f");
   const leftSide = document.getElementById("margin-left");
@@ -249,11 +212,16 @@ function draw(data, meta) {
 
   const rightSide = document.getElementById("margin-right");
   if (rightSide) {
+    const poolNote = colAdjusted
+      ? "Salary COL-adjusted per campus<br>before pooling."
+      : "Salaries not COL-adjusted;<br>pooled across campuses.";
     rightSide.innerHTML = `
       <div style="font-size:0.8rem;color:#aaa;margin-bottom:0.6rem;font-weight:bold;">Wage thresholds</div>
       <div style="font-size:0.75rem;color:#aaa;line-height:1.8;">
         ${WAGE_MARKERS.map(({ key, label, color, dash }) => {
-          const avg = d3.mean(campusMetas, m => m[key] * HOURS_PER_YEAR / m.cost_of_living);
+          const avg = colAdjusted
+            ? d3.mean(campusMetas, m => m[key] * HOURS_PER_YEAR / m.cost_of_living)
+            : d3.mean(campusMetas, m => m[key] * HOURS_PER_YEAR);
           const svgEl = `<svg width="24" height="10" style="vertical-align:middle;margin-right:6px;">
             <line x1="0" y1="5" x2="24" y2="5" stroke="${color}" stroke-width="1.5"
               stroke-dasharray="${dash}"/></svg>`;
@@ -261,7 +229,7 @@ function draw(data, meta) {
         }).join("")}
       </div>
       <div style="font-size:0.72rem;color:#555;margin-top:1rem;line-height:1.6;">
-        Salary COL-adjusted per campus<br>before pooling. Thresholds are<br>averages across all campuses.<br>
+        ${poolNote} Thresholds are<br>averages across all campuses.<br>
         Groups sorted by median.<br>
         +n above each column = pts<br>above Q3 not drawn.<br><br>
         <strong style="color:#444;">Sources</strong><br>
