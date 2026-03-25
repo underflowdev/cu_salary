@@ -1,13 +1,20 @@
 #!/usr/bin/env bash
-# Deploy to S3 at underflow.dev/cu
+# Deploy to S3. Configure scripts/deploy.env (see deploy.env.example).
 
 set -euo pipefail
 
-BUCKET="underflow.dev"
-PREFIX="cu"
-
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+ENV_FILE="$SCRIPT_DIR/deploy.env"
+if [[ ! -f "$ENV_FILE" ]]; then
+  echo "Error: $ENV_FILE not found. Copy deploy.env.example and fill in your values." >&2
+  exit 1
+fi
+# shellcheck source=deploy.env.example
+source "$ENV_FILE"
+
+PREFIX="cu"
 
 echo "Syncing site → s3://$BUCKET/$PREFIX/"
 aws s3 sync "$REPO_ROOT/site/" "s3://$BUCKET/$PREFIX/" \
@@ -21,9 +28,9 @@ aws s3 sync "$REPO_ROOT/data/" "s3://$BUCKET/$PREFIX/data/" \
   --exclude "progress.json" \
   --cache-control "max-age=3600"
 
-echo "Invalidating CloudFront distribution E37D288YP12YC0..."
+echo "Invalidating CloudFront distribution..."
 aws cloudfront create-invalidation \
-  --distribution-id E37D288YP12YC0 \
+  --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" \
   --paths "/*"
 
-echo "Done. Site live at https://underflow.dev/cu"
+echo "Done. Site live at https://$BUCKET/$PREFIX"

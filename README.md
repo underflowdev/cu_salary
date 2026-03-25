@@ -2,8 +2,6 @@
 
 Scrape and visualize salary data from the [CU Salary Database](https://www.cu.edu/budget/cu-salary-database).
 
-Live site: **https://underflow.dev/cu**
-
 ## What's here
 
 | Directory | Purpose |
@@ -50,10 +48,12 @@ python3 -m http.server 8080
 **Deploy to S3:**
 
 ```bash
+cp scripts/deploy.env.example scripts/deploy.env
+# edit scripts/deploy.env with your bucket and CloudFront distribution ID
 ./scripts/deploy.sh
 ```
 
-Syncs `site/` → `s3://underflow.dev/cu/` and `data/` → `s3://underflow.dev/cu/data/`. Requires `aws` CLI configured with appropriate credentials.
+Syncs `site/` and `data/` to S3 and invalidates CloudFront. Requires `aws` CLI configured with appropriate credentials. `scripts/deploy.env` is gitignored.
 
 ### Charts
 
