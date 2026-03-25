@@ -45,16 +45,6 @@ python3 -m http.server 8080
 # site: http://localhost:8080/cu/
 ```
 
-**Deploy to S3:**
-
-```bash
-cp scripts/deploy.env.example scripts/deploy.env
-# edit scripts/deploy.env with your bucket and CloudFront distribution ID
-./scripts/deploy.sh
-```
-
-Syncs `site/` and `data/` to S3 and invalidates CloudFront. Requires `aws` CLI configured with appropriate credentials. `scripts/deploy.env` is gitignored.
-
 ### Charts
 
 **All campuses**
