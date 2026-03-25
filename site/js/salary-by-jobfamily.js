@@ -127,7 +127,7 @@ function draw() {
     .call(ax => ax.select(".domain").remove())
     .selectAll("text")
       .style("font-size", "11px")
-      .style("fill", "#ccc")
+      .style("fill", d => COLOR(d))
       .attr("transform", "rotate(-40)")
       .attr("text-anchor", "end")
       .attr("dx", "-0.4em")
