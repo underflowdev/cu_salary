@@ -173,7 +173,7 @@ function draw() {
     .join("circle")
       .attr("cx", d => xScale(d.campus) + jitter())
       .attr("cy", d => yScale(d.salary))
-      .attr("r", 1.5)
+      .attr("r", d => d.salary > (stats.get(d.campus)?.hi ?? Infinity) ? 3 : 1.5)
       .attr("fill", d => COLOR(d.campus))
       .attr("opacity", 0.35);
 

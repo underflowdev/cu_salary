@@ -74,7 +74,7 @@ All salaries are COL-adjusted (divided by `cost_of_living` from `metadata.json`)
 - `vis/multi-campus-bubble.html` + `js/multi-campus-bubble.js` — one bubble per (campus × job family); campus columns share a Y axis (median COL-adjusted salary); campuses always displayed alphabetically left-to-right (Anschutz, Boulder, Colorado Springs, Denver, System Admin); per-column wage marker dashes (`markerHalfW = xScale.step() * 0.44`); force: `forceX` toward campus center (strength=0.3), `forceY` toward salary target (strength=0.4), 300 ticks
 
 **All-campuses department charts:**
-- `vis/all-depts-strip.html` + `js/all-depts-strip.js` — jittered strip + box/whisker by `dept_name`; all campuses pooled, COL-adjusted per campus; MIN_N=20 (system-wide headcount); same-named depts at different campuses merged; wage thresholds = average COL-adjusted; STEP_PX=28; scrolls horizontally; left margin: n / dept count; right margin: threshold legend + sources
+- `vis/all-depts-strip.html` + `js/all-depts-strip.js` — jittered strip + box/whisker by `dept_name`; all campuses pooled, COL-adjusted per campus; MIN_N=5 (system-wide FTE headcount); same-named depts at different campuses merged; wage thresholds = average COL-adjusted; STEP_PX=28; scrolls horizontally; left margin: n / dept count; right margin: threshold legend + sources
 - `vis/all-depts-bubble.html` + `js/all-depts-bubble.js` — one bubble per `dept_name` system-wide; MIN_N=55; rScale range [8, 90]; 600 force ticks; dynamic SVG expansion post-simulation; tooltip on hover; labels inside bubbles r > 20; wage thresholds = average COL-adjusted; right margin: n / dept count + threshold legend + sources
 
 **Per-campus bubble chart (shared JS, one HTML per campus):**

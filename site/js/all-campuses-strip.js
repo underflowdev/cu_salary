@@ -149,7 +149,8 @@ function draw() {
     .data(d3.shuffle([...data]).filter(d => showOutliers || d.salary <= (stats.get(d.family)?.hi ?? Infinity)))
     .join("circle")
       .attr("cx", d => xScale(d.family) + jitter()).attr("cy", d => yScale(d.salary))
-      .attr("r", 1.5).attr("fill", d => COLOR(d.family)).attr("opacity", 0.25);
+      .attr("r", d => d.salary > (stats.get(d.family)?.hi ?? Infinity) ? 3 : 1.5)
+      .attr("fill", d => COLOR(d.family)).attr("opacity", 0.25);
 
   const boxW = bandwidth * 1.1, whiskerW = boxW * 0.45;
 
