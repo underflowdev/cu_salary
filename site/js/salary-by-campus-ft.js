@@ -136,7 +136,7 @@ function draw() {
 
   g.append("g")
     .attr("transform", `translate(0,${innerH})`)
-    .call(d3.axisBottom(xScale))
+    .call(d3.axisBottom(xScale).tickFormat(d => `${d} (${d3.format(",")(stats.get(d)?.count ?? 0)})`))
     .call(ax => ax.select(".domain").remove())
     .selectAll("text")
       .style("font-size", "13px")

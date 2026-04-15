@@ -125,7 +125,7 @@ function draw() {
 
   g.append("g")
     .attr("transform", `translate(0,${innerH})`)
-    .call(d3.axisBottom(xScale).tickSize(0))
+    .call(d3.axisBottom(xScale).tickSize(0).tickFormat(d => `${d} (${d3.format(",")(stats.get(d)?.count ?? 0)})`))
     .call(ax => ax.select(".domain").remove())
     .selectAll("text")
       .style("font-size", "9px").style("fill", d => COLOR(d))
