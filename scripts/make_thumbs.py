@@ -13,6 +13,7 @@ PORT   = 8080
 BASE   = f"http://localhost:{PORT}/site"
 
 PAGES = [
+    ("threshold-funnel",                   "vis/threshold-funnel.html"),
     ("salary-by-campus-ft",               "vis/salary-by-campus-ft.html"),
     ("ecdf",                               "vis/ecdf.html"),
     ("all-campuses-strip",                "vis/all-campuses-strip.html"),

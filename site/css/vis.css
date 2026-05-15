@@ -66,6 +66,7 @@ body {
 #vis-display {
   padding: 1rem;
   min-height: 600px;
+  min-width: 0;  /* prevent 1fr grid cell from expanding beyond viewport */
 }
 
 /* ── Footer ─────────────────────────────────────────────────────── */

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CU Salary — Below-Threshold Rates by Campus</title>
+  <link rel="stylesheet" href="../css/vis.css">
+</head>
+<body>
+
+  <!-- ── Header ───────────────────────────────────────────────── -->
+  <header id="vis-header">
+    <a class="back-link" href="/cu/">← All visualizations</a>
+    <h1>Wage Band Distribution by Campus</h1>
+    <p class="subtitle" id="vis-subtitle"></p>
+    <label class="col-toggle-label">
+      <input type="checkbox" id="col-toggle" checked>
+      <span>COL-adjusted</span>
+    </label>
+  </header>
+
+  <!-- ── Main display + annotation margins ────────────────────── -->
+  <main id="vis-main">
+    <aside id="margin-left" class="annotation"></aside>
+
+    <div id="vis-display">
+      <!-- D3 renders here -->
+    </div>
+
+    <aside id="margin-right" class="annotation"></aside>
+  </main>
+
+  <!-- ── Footer elaboration ────────────────────────────────────── -->
+  <footer id="vis-footer">
+    <div id="footer-content"></div>
+  </footer>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="../js/threshold-funnel.js"></script>
+</body>
+</html>
