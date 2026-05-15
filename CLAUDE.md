@@ -109,6 +109,9 @@ All salaries are COL-adjusted (divided by `cost_of_living` from `metadata.json`)
 - HTML pages: `vis/boulder-scatter.html`, `vis/anschutz-scatter.html`, `vis/colorado-springs-scatter.html`, `vis/denver-scatter.html`, `vis/system-administration-scatter.html`
 - Legacy `js/boulder-scatter.js` kept as reference but pages now use the shared script
 
+**Below-threshold rates (all-campus connected dot chart):**
+- `vis/threshold-funnel.html` + `js/threshold-funnel.js` — Cleveland-style connected dot chart; full-time employees only; X axis = % of employees below threshold; Y axis = campus sorted by % below living wage (descending); 4 colored dots per campus (poverty/min/living/median) connected by a line; poverty + min wage labels above line, living + median labels below; thresholds are campus-specific (campus's own city rates); footer table shows annualized dollar amounts + % for each campus × threshold combination; left margin: system-wide total + % below living wage; right margin: threshold legend + sources
+
 **Box-and-whisker style (all charts):** dots `r=1.5, opacity=0.35`; whiskers `stroke-width=1.5, opacity=0.6`; IQR box `fill-opacity=0.12, stroke-width=1.5, opacity=0.75`; median `stroke="#fff", stroke-width=2, opacity=0.75`.
 
 #### Scraper / Data notes
